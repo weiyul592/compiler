@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import Backend.Liveness2;
 import Backend.RegisterAllocator;
 import CFG.ControlFlowGraph;
 import Parser.Parser;
@@ -17,25 +18,33 @@ public class Main {
     public static void main(String[] args){
 
 //        Parser.getInstance().parsing("test/test001.txt");
-        Parser.getInstance().parsing("test/test002.txt");
+//        Parser.getInstance().parsing("test/test002.txt");
 //        Parser.getInstance().parsing("test/test003.txt");
 //        Parser.getInstance().parsing("test/test004.txt");
 //        Parser.getInstance().parsing("test/test005.txt");
 //        Parser.getInstance().parsing("test/test006.txt");
 
-//        Parser.getInstance().parsing("test/test007.txt");
+        Parser.getInstance().parsing("test/test007.txt");
 //        Parser.getInstance().parsing("test/test008.txt");
 //        Parser.getInstance().parsing("test/test009.txt");
 
 //        Parser.getInstance().parsing("test/test010.txt");
 
+/*
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
             RegisterAllocator registerAllocator = new RegisterAllocator();
             System.out.println(cfg.getName());
-//            registerAllocator.setLifeRanges();
             registerAllocator.execute(cfg);
         }
-        
+*/
+        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
+            Liveness2 liveset = new Liveness2();
+            System.out.println(cfg.getName());
+            // liveset.print(cfg);
+            liveset.getBlockLiveSet(cfg);;
+            liveset.printBlockInOut();
+        }
+
 //        Parser.getInstance().parsing("test/test011.txt");
 //        Parser.getInstance().parsing("test/test012.txt");
 //        Parser.getInstance().parsing("test/test013.txt");
