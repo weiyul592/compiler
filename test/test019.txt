@@ -1,0 +1,13 @@
+# Copy propagation transitive test
+main
+procedure foo();
+var a, b, c, d;
+{
+	let a <- 1;
+	let b <- a;
+	let c <- b;
+	let d <- c;
+	
+	let d <- d + 1
+};
+{}.
