@@ -23,15 +23,25 @@ import java.util.Set;
  * @author Weiyu, Amir
  */
 public class Liveness2 {
-    HashMap<BasicBlock, Set<Integer> > BlockIn;
-    HashMap<BasicBlock, Set<Integer> > BlockOut;
+    HashMap<BasicBlock, Set<Integer> > BlockLiveIn;
+    HashMap<BasicBlock, Set<Integer> > BlockLiveOut;
+    HashMap<Instruction, Set<Integer> > InstLiveOut;
     
     public Liveness2() {
-        BlockIn = new HashMap<>();
-        BlockOut = new HashMap<>();
+        BlockLiveIn = new HashMap<>();
+        BlockLiveOut = new HashMap<>();
+        // compute live out for each instruction is enough
+        InstLiveOut = new HashMap<>();
     }
     
-    public void getBlockLiveSet(ControlFlowGraph cfg) {
+    public HashMap<Instruction, Set<Integer> > computeLiveSets(ControlFlowGraph cfg) {
+        getBlockLiveSet(cfg);
+        getInstructionLiveSet(cfg);
+        return InstLiveOut;
+    }
+    
+    /* Compute live in and live out for each basic block */
+    private void getBlockLiveSet(ControlFlowGraph cfg) {
         Set<BasicBlock> changed = new HashSet<>();
         BasicBlock exitBlock = null;
         // find exit block
@@ -49,22 +59,16 @@ public class Liveness2 {
         
         // initializtion
         for (BasicBlock block : cfg.getBasicBlocks()) {
-            BlockIn.put(block, new HashSet<>());
+            BlockLiveIn.put(block, new HashSet<>());
         }
         
-        BlockOut.put(exitBlock, new HashSet<>());
+        BlockLiveOut.put(exitBlock, new HashSet<>());
         Set<Integer> exitIn = use(exitBlock);
         exitIn.removeAll( def(exitBlock) );
-        BlockIn.put(exitBlock, exitIn );
+        BlockLiveIn.put(exitBlock, exitIn );
         
         changed.addAll(cfg.getBasicBlocks());
         changed.remove(exitBlock);
-        
-        /*
-        for (BasicBlock b : changed) {
-            System.out.println(b.toStr());
-        }
-        */
         
         while (!changed.isEmpty()) {
             // pick one block from the set of basic blocks
@@ -72,49 +76,76 @@ public class Liveness2 {
             for (BasicBlock block : changed) {
                 currBlock = block;
                 changed.remove(block);
-                //System.out.println(currBlock.toStr());
                 break;
             }
             
-            Set<Integer> currBlockOut = new HashSet<>();
+            Set<Integer> currBlockLiveOut = new HashSet<>();
             List<Instruction> phiInsts = new ArrayList<>();
             for (BasicBlock successor : currBlock.getChildrenBlock()) {
-                currBlockOut.addAll( BlockIn.get(successor) );
+                currBlockLiveOut.addAll( BlockLiveIn.get(successor) );
                 
                 // collect phi instructions for later "partial" removal
                 phiInsts.addAll( successor.getPhiInstructions() );
             }
             
-            System.out.println(currBlock.toStr() + " has phi: ");
             for (Instruction phi : phiInsts) {
-                phi.print();
+                Integer notDefinedInThisPath = checkPhi(currBlock, phi);
+                currBlockLiveOut.remove(notDefinedInThisPath);
             }
             
-            //System.out.println(currBlockOut);
+            BlockLiveOut.put(currBlock, currBlockLiveOut);
             
-            BlockOut.put(currBlock, currBlockOut);
+            Set<Integer> currBlockLiveIn = new HashSet(currBlockLiveOut);
+            currBlockLiveIn.addAll( use(currBlock) );
+            currBlockLiveIn.removeAll( def(currBlock) );
             
-            Set<Integer> currBlockIn = new HashSet(currBlockOut);
-            //currBlockIn.removeAll( def(currBlock) );
-            //currBlockIn.addAll( use(currBlock) );
-            currBlockIn.addAll( use(currBlock) );
-            currBlockIn.removeAll( def(currBlock) );
+            Set<Integer> oldIn = BlockLiveIn.get(currBlock);
+            BlockLiveIn.put(currBlock, currBlockLiveIn);
             
-            Set<Integer> oldIn = BlockIn.get(currBlock);
-            BlockIn.put(currBlock, currBlockIn);
-            
-            //System.out.println("old in: " + oldIn);
-            //System.out.println("new in: " + currBlockIn);
-            
-            if ( !setContentEqual(oldIn, currBlockIn) ) {
+            if ( !setContentEqual(oldIn, currBlockLiveIn) ) {
                 // System.out.println("old in not equal to new in");
                 for (BasicBlock predecessor : currBlock.getParent()) {
                     changed.add(predecessor);
                 }
-            } else {
-                // System.out.println("equals");
+            } 
+        }
+    }
+    
+    /* Compute live in and live out for each instruction */
+    private void getInstructionLiveSet(ControlFlowGraph cfg) {
+        Set<Integer> currBlockLiveIn = new HashSet<>();
+        Set<Integer> currBlockLiveOut = new HashSet<>();
+                
+        for (BasicBlock block : cfg.getBasicBlocks()) {
+            currBlockLiveIn = BlockLiveIn.get(block);
+            currBlockLiveOut = BlockLiveOut.get(block);
+            
+            Instruction lastInst = block.getLastInst();
+            if (lastInst != null) {
+                InstLiveOut.put(lastInst, currBlockLiveOut);
+                //lastInst.print();
+                //System.out.println(currBlockLiveOut);
+            } 
+            
+            Instruction currInst = lastInst;
+            while ( currInst != null && currInst != block.getFirstInst().getPrevious() ) {
+                if (currInst == lastInst) {
+                    currInst = currInst.getPrevious();
+                    continue;
+                }
+                            
+                Instruction nextInst = currInst.getNext();
+                Set<Integer> nextInstLiveOut = InstLiveOut.get(nextInst);
+                Set<Integer> currInstLiveOut = new HashSet<>(nextInstLiveOut);
+                currInstLiveOut.addAll( use(nextInst) );
+                currInstLiveOut.removeAll( def(nextInst) );
+                
+                InstLiveOut.put(currInst, currInstLiveOut);
+                
+                currInst = currInst.getPrevious();
             }
         }
+    
     }
     
     public Set<Integer> def(Instruction inst) {
@@ -237,11 +268,52 @@ public class Liveness2 {
         return false;
     }
     
+    /* This function checks which operand of phiInst is defined in this basic block 
+       and the path above.  The return value is the instruction number of the 
+       operand not defined in this path.
+    */
+    private Integer checkPhi(BasicBlock block, Instruction phiInst) {
+        BasicBlock currBlock = block;
+        Instruction currInst;
+        Result op1 = phiInst.getOperand1();
+        Result op2 = phiInst.getOperand2();
+        Integer op1InstNum = null, op2InstNum = null;
+        
+        if (op1 != null) 
+            op1InstNum = op1.getInstNumber();
+        if (op2 != null) 
+            op2InstNum = op2.getInstNumber();
+        
+        while (block != null) {
+            currInst = block.getLastInst();
+            
+            while ( currInst != null && currInst != block.getFirstInst().getPrevious() ) {
+                if (currInst.getInstNumber() == op1InstNum ) // op1 is defined in this path
+                    return op2InstNum;
+                else if (currInst.getInstNumber() == op2InstNum)
+                    return op1InstNum;
+                
+                currInst = currInst.getPrevious();
+            }
+            
+            block = block.getImmeDominator();
+        }
+        
+        return null;
+    }
+    
     public void printBlockInOut() {
-        for (BasicBlock key : BlockIn.keySet()) {
+        for (BasicBlock key : BlockLiveIn.keySet()) {
             System.out.println(key.toStr());
-            System.out.println("In: " + BlockIn.get(key));
-            System.out.println("Out: " + BlockOut.get(key));
+            System.out.println("In: " + BlockLiveIn.get(key));
+            System.out.println("Out: " + BlockLiveOut.get(key));
+        }
+    }
+    
+    public void printInstOut() {
+        for (Instruction key : InstLiveOut.keySet()) {
+            key.print();
+            System.out.println("Out: " + InstLiveOut.get(key));
         }
     }
     

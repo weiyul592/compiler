@@ -40,9 +40,10 @@ public class Main {
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
             Liveness2 liveset = new Liveness2();
             System.out.println(cfg.getName());
-            // liveset.print(cfg);
-            liveset.getBlockLiveSet(cfg);;
-            liveset.printBlockInOut();
+            
+            liveset.computeLiveSets(cfg);
+            System.out.println("----------");
+            //liveset.printInstOut();
         }
 
 //        Parser.getInstance().parsing("test/test011.txt");
