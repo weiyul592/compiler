@@ -1,0 +1,9 @@
+digraph baz {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 c_1
+"];
+
+
+}

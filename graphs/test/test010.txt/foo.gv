@@ -1,0 +1,58 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 a_1
+2 MOVE #2 b_2
+3 MOVE #3 c_3
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+7 ADD a_9 #1
+8 MOVE 7 a_8
+10 ADD c_12 #1
+11 MOVE 10 c_11
+13 WRITE a_8 
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+4 WRITE a_9 
+23 WRITE b_22 
+24 WRITE c_12 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+9 PHI a_1 a_8
+12 PHI c_3 c_11
+22 PHI b_2 b_20
+5 CMP a_9 b_22
+6 BGE 5 4
+"];
+"Basic Block 4" [shape=box, label="Basic Block 4
+=================
+17 WRITE c_11 
+18 ADD b_20 #1
+19 MOVE 18 b_19
+21 BRA 20 
+"];
+"Basic Block 5" [shape=box, label="Basic Block 5
+=================
+14 BRA 9 
+"];
+"Basic Block 6" [shape=box, label="Basic Block 6
+=================
+20 PHI b_22 b_19
+15 CMP b_20 c_11
+16 BGE 15 14
+"];
+
+"Basic Block 0" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 6";
+"Basic Block 3" -> "Basic Block 1";
+"Basic Block 3" -> "Basic Block 2";
+"Basic Block 4" -> "Basic Block 6";
+"Basic Block 5" -> "Basic Block 3";
+"Basic Block 6" -> "Basic Block 4";
+"Basic Block 6" -> "Basic Block 5";
+
+}

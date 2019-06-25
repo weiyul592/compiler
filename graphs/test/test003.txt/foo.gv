@@ -1,0 +1,19 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 WRITE #55 
+2 ADD DF #112
+3 STORE #2 2
+4 ADD DF #116
+5 STORE #3 4
+6 ADD DF #112
+7 LOAD 6 
+8 ADD DF #116
+9 LOAD 8 
+10 ADD b_7 c_9
+11 RET 10 
+"];
+
+
+}

@@ -1,0 +1,40 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #2 a_1
+2 MOVE #3 b_2
+4 CMP a_1 b_2
+5 BGE 4 12
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+6 MOVE #1 a_6
+7 ADD a_6 #1
+8 MOVE 7 b_8
+10 ADD a_6 #1
+11 MOVE 10 a_11
+16 BRA 3 
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+3 PHI a_11 a_13
+9 PHI b_8 b_2
+15 PHI c_14
+17 ADD a_3 #1
+18 MOVE 17 a_18
+19 WRITE a_18 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+12 ADD a_1 #1
+13 MOVE 12 a_13
+14 MOVE #2 c_14
+"];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 2";
+"Basic Block 3" -> "Basic Block 2";
+
+}

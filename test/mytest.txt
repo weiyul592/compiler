@@ -1,0 +1,17 @@
+main
+var x, y, z, a, b;
+//array [3]input;
+
+//function foo();
+//{
+//	let a <- 33;
+//	return 42
+//};
+{
+	let x <- 1;
+	let y <- x;
+	let z <- y + 1;
+	let a <- z;
+	let b <- a;
+}
+.

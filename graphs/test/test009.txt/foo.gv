@@ -1,0 +1,86 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 a_1
+2 MOVE #2 b_2
+3 MOVE #3 c_3
+5 CMP a_1 b_2
+6 BLE 5 20
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+7 ADD a_1 #1
+8 MOVE 7 a_8
+10 CMP a_8 b_2
+11 BGE 10 9
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+4 PHI a_9 a_23
+19 PHI c_18 c_3
+22 PHI b_2 b_21
+32 ADD a_4 #1
+33 MOVE 32 a_33
+34 WRITE a_33 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+12 MUL a_8 #4
+13 MOVE 12 a_13
+15 CMP c_3 a_13
+16 BEQ 15 14
+"];
+"Basic Block 4" [shape=box, label="Basic Block 4
+=================
+9 PHI a_13 a_8
+18 PHI c_14 c_3
+31 BRA 4 
+"];
+"Basic Block 5" [shape=box, label="Basic Block 5
+=================
+17 MOVE a_13 c_17
+"];
+"Basic Block 6" [shape=box, label="Basic Block 6
+=================
+14 PHI c_17 c_3
+"];
+"Basic Block 7" [shape=box, label="Basic Block 7
+=================
+20 ADD b_2 #5
+21 MOVE 20 b_21
+24 CMP a_1 b_21
+25 BGE 24 28
+"];
+"Basic Block 8" [shape=box, label="Basic Block 8
+=================
+26 SUB a_1 #2
+27 MOVE 26 a_27
+30 BRA 23 
+"];
+"Basic Block 9" [shape=box, label="Basic Block 9
+=================
+23 PHI a_27 a_29
+"];
+"Basic Block 10" [shape=box, label="Basic Block 10
+=================
+28 ADD a_1 #3
+29 MOVE 28 a_29
+"];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 7";
+"Basic Block 1" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 4";
+"Basic Block 3" -> "Basic Block 5";
+"Basic Block 3" -> "Basic Block 6";
+"Basic Block 4" -> "Basic Block 2";
+"Basic Block 5" -> "Basic Block 6";
+"Basic Block 6" -> "Basic Block 4";
+"Basic Block 7" -> "Basic Block 8";
+"Basic Block 7" -> "Basic Block 10";
+"Basic Block 8" -> "Basic Block 9";
+"Basic Block 9" -> "Basic Block 2";
+"Basic Block 10" -> "Basic Block 9";
+
+}

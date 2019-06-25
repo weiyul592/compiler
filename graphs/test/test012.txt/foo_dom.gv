@@ -1,0 +1,12 @@
+digraph foo {
+
+"Basic Block 0" [shape=box];
+"Basic Block 1" [shape=box];
+"Basic Block 2" [shape=box];
+"Basic Block 3" [shape=box];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 2";
+"Basic Block 0" -> "Basic Block 3";
+
+}

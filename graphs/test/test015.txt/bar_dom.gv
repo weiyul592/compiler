@@ -1,0 +1,22 @@
+digraph bar {
+
+"Basic Block 0" [shape=box];
+"Basic Block 1" [shape=box];
+"Basic Block 2" [shape=box];
+"Basic Block 3" [shape=box];
+"Basic Block 4" [shape=box];
+"Basic Block 5" [shape=box];
+"Basic Block 6" [shape=box];
+"Basic Block 7" [shape=box];
+"Basic Block 8" [shape=box];
+
+"Basic Block 0" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 4";
+"Basic Block 1" -> "Basic Block 5";
+"Basic Block 3" -> "Basic Block 1";
+"Basic Block 3" -> "Basic Block 2";
+"Basic Block 5" -> "Basic Block 8";
+"Basic Block 8" -> "Basic Block 6";
+"Basic Block 8" -> "Basic Block 7";
+
+}

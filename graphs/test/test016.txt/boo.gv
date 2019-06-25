@@ -1,0 +1,38 @@
+digraph boo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #0 i_1
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+7 ADDA DF #16
+8 LOAD 7 
+9 ADDA DF #16
+10 LOAD 9 
+11 MUL x_8 x_10
+12 ADD DF #16
+13 STORE 11 12
+14 BRA 3 
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+2 ADDA DF #16
+15 LOAD 2 
+16 ADD x_15 #4
+17 RET 16 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+3 ADDA DF #20
+4 LOAD 3 
+5 CMP i_1 y_4
+6 BGE 5 2
+"];
+
+"Basic Block 0" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 3";
+"Basic Block 3" -> "Basic Block 1";
+"Basic Block 3" -> "Basic Block 2";
+
+}

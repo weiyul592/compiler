@@ -1,0 +1,119 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 a_1
+2 MOVE #2 b_2
+3 MOVE #3 c_3
+4 MOVE #4 d_4
+6 CMP a_1 b_2
+7 BGE 6 22
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+8 ADD a_1 #1
+9 MOVE 8 a_9
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+5 PHI a_9 a_23
+20 PHI c_15 c_29
+21 PHI d_18 d_32
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+13 ADD c_15 #2
+14 MOVE 13 c_14
+16 ADD d_18 #1
+17 MOVE 16 d_17
+19 BRA 15 
+"];
+"Basic Block 4" [shape=box, label="Basic Block 4
+=================
+10 BRA 5 
+"];
+"Basic Block 5" [shape=box, label="Basic Block 5
+=================
+15 PHI c_3 c_14
+18 PHI d_4 d_17
+11 CMP c_15 d_18
+12 BGE 11 10
+"];
+"Basic Block 6" [shape=box, label="Basic Block 6
+=================
+22 ADD a_1 #2
+23 MOVE 22 a_23
+"];
+"Basic Block 7" [shape=box, label="Basic Block 7
+=================
+27 ADD c_29 #3
+28 MOVE 27 c_28
+30 ADD d_32 #2
+31 MOVE 30 d_31
+33 BRA 29 
+"];
+"Basic Block 8" [shape=box, label="Basic Block 8
+=================
+24 EMPTY 
+"];
+"Basic Block 9" [shape=box, label="Basic Block 9
+=================
+29 PHI c_3 c_28
+32 PHI d_4 d_31
+25 CMP c_29 d_32
+26 BGE 25 24
+"];
+"Basic Block 10" [shape=box, label="Basic Block 10
+=================
+38 CMP a_5 d_21
+39 BLE 38 41
+"];
+"Basic Block 11" [shape=box, label="Basic Block 11
+=================
+34 EMPTY 
+"];
+"Basic Block 12" [shape=box, label="Basic Block 12
+=================
+44 PHI b_2 b_37
+45 PHI c_20 c_42
+35 CMP b_44 d_21
+36 BGE 35 34
+"];
+"Basic Block 13" [shape=box, label="Basic Block 13
+=================
+40 MOVE c_45 b_40
+43 BRA 37 
+"];
+"Basic Block 14" [shape=box, label="Basic Block 14
+=================
+37 PHI b_40 b_44
+42 PHI c_45 c_41
+46 BRA 44 
+"];
+"Basic Block 15" [shape=box, label="Basic Block 15
+=================
+41 MOVE b_44 c_41
+"];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 6";
+"Basic Block 1" -> "Basic Block 5";
+"Basic Block 2" -> "Basic Block 12";
+"Basic Block 3" -> "Basic Block 5";
+"Basic Block 4" -> "Basic Block 2";
+"Basic Block 5" -> "Basic Block 3";
+"Basic Block 5" -> "Basic Block 4";
+"Basic Block 6" -> "Basic Block 9";
+"Basic Block 7" -> "Basic Block 9";
+"Basic Block 8" -> "Basic Block 2";
+"Basic Block 9" -> "Basic Block 7";
+"Basic Block 9" -> "Basic Block 8";
+"Basic Block 10" -> "Basic Block 13";
+"Basic Block 10" -> "Basic Block 15";
+"Basic Block 12" -> "Basic Block 10";
+"Basic Block 12" -> "Basic Block 11";
+"Basic Block 13" -> "Basic Block 14";
+"Basic Block 14" -> "Basic Block 12";
+"Basic Block 15" -> "Basic Block 14";
+
+}

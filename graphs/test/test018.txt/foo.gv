@@ -1,0 +1,71 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 a_1
+2 MOVE #1 b_2
+3 MOVE #1 c_3
+4 MOVE #1 d_4
+5 MOVE #1 e_5
+6 MOVE #1 f_6
+7 MOVE #1 g_7
+8 MOVE #1 h_8
+9 ADD a_1 b_2
+10 MOVE 9 c_10
+11 MOVE c_10 d_11
+12 MUL d_11 d_11
+13 MOVE 12 e_13
+14 ADD a_1 c_10
+15 MOVE 14 f_15
+16 MOVE e_13 g_16
+17 ADD g_16 d_11
+18 MOVE 17 a_18
+20 CMP a_18 c_10
+21 BGE 20 24
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+22 ADD g_16 #1
+23 MOVE 22 h_23
+32 BRA 19 
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+19 PHI h_23 h_8
+26 PHI f_15 f_25
+31 PHI c_10 c_27
+33 MUL g_16 a_18
+34 MOVE 33 b_34
+35 WRITE a_18 
+36 WRITE b_34 
+37 WRITE c_31 
+38 WRITE d_11 
+39 WRITE f_26 
+40 WRITE g_16 
+41 WRITE h_19 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+24 SUB d_11 g_16
+25 MOVE 24 f_25
+28 CMP f_25 a_18
+29 BLE 28 27
+"];
+"Basic Block 4" [shape=box, label="Basic Block 4
+=================
+30 MOVE #2 c_30
+"];
+"Basic Block 5" [shape=box, label="Basic Block 5
+=================
+27 PHI c_30 c_10
+"];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 2";
+"Basic Block 3" -> "Basic Block 4";
+"Basic Block 3" -> "Basic Block 5";
+"Basic Block 4" -> "Basic Block 5";
+"Basic Block 5" -> "Basic Block 2";
+
+}

@@ -1,0 +1,15 @@
+digraph main {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 null 
+1 MOVE #1 x_1
+2 MOVE x_1 y_2
+3 ADD y_2 #1
+4 MOVE 3 z_4
+5 MOVE z_4 a_5
+6 MOVE a_5 b_6
+"];
+
+
+}

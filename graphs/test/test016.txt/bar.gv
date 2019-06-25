@@ -1,0 +1,12 @@
+digraph bar {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 b_1
+2 MOVE #1 c_2
+3 ADD DF #20
+4 STORE b_1 3
+"];
+
+
+}

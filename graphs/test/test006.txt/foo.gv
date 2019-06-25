@@ -1,0 +1,10 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #0 i_1
+2 RET i_1 
+"];
+
+
+}

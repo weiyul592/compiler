@@ -1,0 +1,139 @@
+digraph foo {
+
+"Basic Block 0" [shape=box, label="Basic Block 0
+=================
+1 MOVE #1 a_1
+2 MOVE #2 b_2
+3 MOVE #3 c_3
+4 MOVE #4 d_4
+5 MOVE #5 e_5
+6 MOVE #6 f_6
+7 MOVE #7 g_7
+8 MOVE #8 h_8
+10 CMP a_1 b_2
+11 BGE 10 33
+"];
+"Basic Block 1" [shape=box, label="Basic Block 1
+=================
+12 ADD a_1 #1
+13 MOVE 12 a_13
+14 ADD e_5 #1
+15 MOVE 14 e_15
+18 CMP b_2 c_3
+19 BGE 18 17
+"];
+"Basic Block 2" [shape=box, label="Basic Block 2
+=================
+9 PHI a_29 a_1
+16 PHI e_15 e_5
+30 PHI c_17 c_39
+32 PHI g_31 g_7
+35 PHI b_2 b_54
+38 PHI f_6 f_37
+60 PHI d_4 d_59
+62 PHI h_8 h_61
+64 WRITE a_9 
+65 WRITE b_35 
+66 WRITE c_30 
+67 WRITE d_60 
+68 WRITE e_16 
+69 WRITE f_38 
+70 WRITE h_62 
+"];
+"Basic Block 3" [shape=box, label="Basic Block 3
+=================
+20 MUL c_3 #3
+21 MOVE 20 c_21
+"];
+"Basic Block 4" [shape=box, label="Basic Block 4
+=================
+17 PHI c_21 c_3
+29 PHI a_27 a_13
+31 MOVE #9 g_31
+63 BRA 9 
+"];
+"Basic Block 5" [shape=box, label="Basic Block 5
+=================
+25 ADD a_27 #1
+26 MOVE 25 a_26
+28 BRA 27 
+"];
+"Basic Block 6" [shape=box, label="Basic Block 6
+=================
+22 EMPTY 
+"];
+"Basic Block 7" [shape=box, label="Basic Block 7
+=================
+27 PHI a_13 a_26
+23 CMP a_27 c_21
+24 BGE 23 22
+"];
+"Basic Block 8" [shape=box, label="Basic Block 8
+=================
+33 SUB b_2 #1
+34 MOVE 33 b_34
+36 ADD f_6 #1
+37 MOVE 36 f_37
+40 CMP b_34 c_3
+41 BGE 40 55
+"];
+"Basic Block 9" [shape=box, label="Basic Block 9
+=================
+42 MUL c_3 #3
+43 MOVE 42 c_43
+"];
+"Basic Block 10" [shape=box, label="Basic Block 10
+=================
+39 PHI c_52 c_56
+54 PHI b_49 b_34
+59 PHI d_4 d_58
+61 MOVE #425 h_61
+"];
+"Basic Block 11" [shape=box, label="Basic Block 11
+=================
+47 ADD b_49 #1
+48 MOVE 47 b_48
+50 SUB c_52 #1
+51 MOVE 50 c_51
+53 BRA 49 
+"];
+"Basic Block 12" [shape=box, label="Basic Block 12
+=================
+44 BRA 39 
+"];
+"Basic Block 13" [shape=box, label="Basic Block 13
+=================
+49 PHI b_34 b_48
+52 PHI c_43 c_51
+45 CMP b_49 c_52
+46 BGE 45 44
+"];
+"Basic Block 14" [shape=box, label="Basic Block 14
+=================
+55 MUL c_3 #4
+56 MOVE 55 c_56
+57 ADD d_4 #1
+58 MOVE 57 d_58
+"];
+
+"Basic Block 0" -> "Basic Block 1";
+"Basic Block 0" -> "Basic Block 8";
+"Basic Block 1" -> "Basic Block 3";
+"Basic Block 1" -> "Basic Block 4";
+"Basic Block 3" -> "Basic Block 7";
+"Basic Block 4" -> "Basic Block 2";
+"Basic Block 5" -> "Basic Block 7";
+"Basic Block 6" -> "Basic Block 4";
+"Basic Block 7" -> "Basic Block 5";
+"Basic Block 7" -> "Basic Block 6";
+"Basic Block 8" -> "Basic Block 9";
+"Basic Block 8" -> "Basic Block 14";
+"Basic Block 9" -> "Basic Block 13";
+"Basic Block 10" -> "Basic Block 2";
+"Basic Block 11" -> "Basic Block 13";
+"Basic Block 12" -> "Basic Block 10";
+"Basic Block 13" -> "Basic Block 11";
+"Basic Block 13" -> "Basic Block 12";
+"Basic Block 14" -> "Basic Block 10";
+
+}
