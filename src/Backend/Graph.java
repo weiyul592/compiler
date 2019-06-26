@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 
 /* All the nodes are represented by integers */
-public class InterferenceGraph {
+public class Graph {
     private HashMap<Integer, Node> nodes;
     
     public class Node {
@@ -41,7 +41,7 @@ public class InterferenceGraph {
         }
     }
     
-    public InterferenceGraph() {
+    public Graph() {
         nodes = new HashMap<>();
     }
     

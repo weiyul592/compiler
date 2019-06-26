@@ -24,17 +24,19 @@ import Lex.Result.ResultType;
  */
 public class RegisterAllocator {
     private HashMap< Instruction, Set<Integer> > liveRanges;
-    private InterferenceGraph interGraph;
+    private Graph interGraph;
     
     // private Integer[][] LifeRanges = new Integer[10000][10000];
 
     public RegisterAllocator() {
-        interGraph = new InterferenceGraph();
+        interGraph = new Graph();
     }
 
     public void execute(ControlFlowGraph cfg) {
         Liveness analysis = new Liveness();
         liveRanges = analysis.computeLiveSets(cfg);
+        
+        analysis.printInstOut();
         
         buildGraph();
         interGraph.print();
@@ -51,6 +53,10 @@ public class RegisterAllocator {
                     Integer node2 = liveList.get(j);
                     interGraph.addEdge(node1, node2);
                 }
+            }
+            
+            if ( liveList.size() == 1) {
+                interGraph.addNode( liveList.get(0) );
             }
         }
     }
