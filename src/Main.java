@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import Backend.Liveness2;
+import Backend.Liveness;
 import Backend.RegisterAllocator;
 import CFG.ControlFlowGraph;
 import Parser.Parser;
@@ -30,20 +30,10 @@ public class Main {
 
 //        Parser.getInstance().parsing("test/test010.txt");
 
-/*
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
             RegisterAllocator registerAllocator = new RegisterAllocator();
             System.out.println(cfg.getName());
             registerAllocator.execute(cfg);
-        }
-*/
-        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
-            Liveness2 liveset = new Liveness2();
-            System.out.println(cfg.getName());
-            
-            liveset.computeLiveSets(cfg);
-            System.out.println("----------");
-            //liveset.printInstOut();
         }
 
 //        Parser.getInstance().parsing("test/test011.txt");

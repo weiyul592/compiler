@@ -8,12 +8,8 @@ var a, b;
 	if a > b then
 		let a <- a + 1
 	else
-<<<<<<< HEAD
 		let b <- b + 1;
 		let a <- b + 2
-=======
-		let a <- a + 2
->>>>>>> 424d5e9bd79f2327dc56bcd6dec5ce468285f1fd
 	fi;
 	
 	if a < b then
