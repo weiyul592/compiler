@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -21,8 +22,8 @@ public class Graph {
     private HashMap<Integer, Node> nodes;
     
     public class Node {
-        Integer nodeNumber;
-        List<Integer> outEdges;
+        private Integer nodeNumber;
+        private List<Integer> outEdges;
         
         public Node(Integer number) {
             nodeNumber = number;
@@ -38,6 +39,10 @@ public class Graph {
         
         public List<Integer> getEdges() {
             return outEdges;
+        }
+        
+        public Integer getNodeName() {
+            return nodeNumber;
         }
     }
     
@@ -78,6 +83,10 @@ public class Graph {
     /* return all the node names (integers) in the interference graph. */
     public Set<Integer> getNodeNames() {
         return nodes.keySet();
+    }
+    
+    public Collection<Node> getNodes() {
+        return nodes.values();
     }
     
     /* return all the nodes connected to node x */

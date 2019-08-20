@@ -18,6 +18,7 @@ import CFG.ControlFlowGraph;
 import CFG.BasicBlock;
 import Lex.Result;
 import Lex.Result.ResultType;
+import Backend.Graph.Node;
 /**
  *
  * @author Weiyu, Amir
@@ -36,10 +37,11 @@ public class RegisterAllocator {
         Liveness analysis = new Liveness();
         liveRanges = analysis.computeLiveSets(cfg);
         
-        analysis.printInstOut();
+//        analysis.printInstOut();
         
         buildGraph();
         interGraph.print();
+        MCS();
     }
 
     // build interference graph
@@ -59,5 +61,44 @@ public class RegisterAllocator {
                 interGraph.addNode( liveList.get(0) );
             }
         }
+    }
+    
+    /* Maximum Cardinality Search algorithm. 
+     * Returns a Simplicial Elimination Ordering */
+    List<Integer> MCS() {
+        HashMap<Node, Integer> cost_map = new HashMap<>();
+        List<Integer> SimElimOrder = new ArrayList();   
+        Set<Node> nodeSet = new HashSet<>(interGraph.getNodes());
+        
+        for (Node node : nodeSet)
+            cost_map.put(node, 0);
+        
+        int nodeSetSize = nodeSet.size();
+        for (int i = 0; i < nodeSetSize; i++) {
+            // find the node with the max cost
+            Node maxnode = null;
+            int maxcost = -1;
+            
+            for (Node node : nodeSet) {
+                int cost = cost_map.get(node);
+                if ( maxcost < cost ) {
+                    maxcost = cost;
+                    maxnode = node;
+                }
+            }
+            
+            SimElimOrder.add(maxnode.getNodeName());
+            for (Integer neighbor : maxnode.getEdges()) {
+                Node neighborNode = interGraph.getNode(neighbor);
+                
+                if (nodeSet.contains(neighborNode)) {
+                    Integer original_cost = cost_map.get(neighborNode);
+                    cost_map.put(neighborNode, original_cost + 1);
+                }
+                nodeSet.remove(maxnode);
+            }
+        }
+        
+        return SimElimOrder;
     }
 }
