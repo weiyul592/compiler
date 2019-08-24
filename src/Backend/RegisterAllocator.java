@@ -36,12 +36,18 @@ public class RegisterAllocator {
     public void execute(ControlFlowGraph cfg) {
         Liveness analysis = new Liveness();
         liveRanges = analysis.computeLiveSets(cfg);
+        // analysis.printInstOut();
         
-//        analysis.printInstOut();
-        
+        // build interference graph
         buildGraph();
-        interGraph.print();
-        MCS();
+        //interGraph.dumpGraph(null);
+        
+        List<Integer> elim_order = MCS();
+        //System.out.println(elim_order);
+        
+        HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
+        //System.out.println(coloring);
+        interGraph.dumpGraph(coloring);
     }
 
     // build interference graph
@@ -65,7 +71,7 @@ public class RegisterAllocator {
     
     /* Maximum Cardinality Search algorithm. 
      * Returns a Simplicial Elimination Ordering */
-    List<Integer> MCS() {
+    private List<Integer> MCS() {
         HashMap<Node, Integer> cost_map = new HashMap<>();
         List<Integer> SimElimOrder = new ArrayList();   
         Set<Node> nodeSet = new HashSet<>(interGraph.getNodes());
@@ -100,5 +106,33 @@ public class RegisterAllocator {
         }
         
         return SimElimOrder;
+    }
+    
+    private HashMap<Integer, Integer> greedy_coloring(List<Integer> elim_order) {
+        HashMap<Integer, Integer> coloring = new HashMap<>();
+        
+        for (Integer node_name : interGraph.getNodeNames()) {
+            coloring.put(node_name, -1);
+        }
+        
+        for (Integer node_id : interGraph.getNodeNames()) {
+            Node node = interGraph.getNode(node_id);
+            List<Integer> neighbors = node.getEdges();
+            
+            HashSet<Integer> neighbor_colors = new HashSet<>();
+            for (Integer neighbor : neighbors) {
+                Integer color = coloring.get(neighbor);
+                neighbor_colors.add(color);
+            }
+            
+            // find the lowest color not used by neighbors
+            Integer lowest_color = 0;
+            while (neighbor_colors.contains(lowest_color)) {
+                lowest_color++;
+            }
+            coloring.put(node_id, lowest_color);
+        }
+        
+        return coloring;
     }
 }
