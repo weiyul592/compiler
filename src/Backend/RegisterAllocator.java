@@ -160,10 +160,11 @@ public class RegisterAllocator {
                 Integer op_inst_number = operand.getInstNumber();
                 if ( !cluster_edges.contains(op_inst_number) ) {
                     HashSet<Integer> out_edges = interGraph.getOutEdges(op_inst_number);
-                    cluster.add(op_inst_number);
+                    if (out_edges == null)
+                        continue;
                     
-                    if (out_edges != null)
-                        cluster_edges.addAll( out_edges );
+                    cluster.add(op_inst_number);
+                    cluster_edges.addAll( out_edges );
                     
                     interGraph.removeNode(op_inst_number);
                 }
