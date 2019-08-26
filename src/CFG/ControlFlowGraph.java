@@ -132,8 +132,8 @@ public class ControlFlowGraph {
 
         for (ControlFlowGraph controlFlowGraph: controlFlowGraphs.values()) {
             controlFlowGraph.generateControlFlowGraphFile();
-            controlFlowGraph.generateDominationTreeFile();
-            controlFlowGraph.generateChildParentTreeFile();
+            // controlFlowGraph.generateDominationTreeFile();
+            // controlFlowGraph.generateChildParentTreeFile();
         }
     }
 
@@ -227,13 +227,17 @@ public class ControlFlowGraph {
 
     private void createGraphFile(String graphDescription, String fileNamePostfix) {
         try {
+            // only create .gv
             Path graphFile = Paths.get("graphs", Parser.getInstance().getFileName(),
                     getName() + fileNamePostfix + ".gv");
+            Files.write(graphFile, graphDescription.getBytes());
+            
+            /*
             Path psFile = Paths.get("graphs", Parser.getInstance().getFileName(),
                     getName() + fileNamePostfix + ".ps");
 
-            Files.write(graphFile, graphDescription.getBytes());
             Runtime.getRuntime().exec("dot -Tps " + graphFile + " -o " + psFile);
+            */
         } catch (IOException e) {
             e.printStackTrace();
         }

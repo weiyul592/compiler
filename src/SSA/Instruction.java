@@ -273,6 +273,15 @@ public class Instruction {
 
     public Instruction getPrevious() { return this.previous; }
     public Instruction getNext() { return this.next; }
+    public List<Result> getOperands() {
+        List<Result> operands = new ArrayList<>();
+        if (operand1 != null)
+            operands.add(operand1);
+        if (operand2 != null)
+            operands.add(operand2);
+        
+        return operands;
+    }
     
     public String toStr() {
         String op1 = null;
