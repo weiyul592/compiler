@@ -26,8 +26,6 @@ import Backend.Graph.Node;
 public class RegisterAllocator {
     private HashMap< Instruction, Set<Integer> > liveRanges;
     private Graph interGraph;
-    
-    // private Integer[][] LifeRanges = new Integer[10000][10000];
 
     public RegisterAllocator() {
         interGraph = new Graph();
@@ -40,14 +38,13 @@ public class RegisterAllocator {
         
         // build interference graph
         buildGraph();
-        //interGraph.dumpGraph(null);
+        coalesce(cfg);
+        interGraph.dumpGraph(null);
         
         List<Integer> elim_order = MCS();
-        //System.out.println(elim_order);
         
         HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
-        //System.out.println(coloring);
-        interGraph.dumpGraph(coloring);
+        //interGraph.dumpGraph(coloring);
     }
 
     // build interference graph
@@ -108,6 +105,7 @@ public class RegisterAllocator {
         return SimElimOrder;
     }
     
+    /* greedy coloring algorithm */
     private HashMap<Integer, Integer> greedy_coloring(List<Integer> elim_order) {
         HashMap<Integer, Integer> coloring = new HashMap<>();
         
@@ -117,7 +115,7 @@ public class RegisterAllocator {
         
         for (Integer node_id : interGraph.getNodeNames()) {
             Node node = interGraph.getNode(node_id);
-            List<Integer> neighbors = node.getEdges();
+            HashSet<Integer> neighbors = node.getEdges();
             
             HashSet<Integer> neighbor_colors = new HashSet<>();
             for (Integer neighbor : neighbors) {
@@ -134,5 +132,58 @@ public class RegisterAllocator {
         }
         
         return coloring;
+    }
+    
+    // coalsce live ranges for Phi nodes
+    private void coalesce(ControlFlowGraph cfg) {
+        List<Instruction> PhiInsts = new ArrayList<>();
+        
+        for (BasicBlock block : cfg.getBasicBlocks()) {
+            for (Instruction inst : block.PHIInsts.values()) {
+                PhiInsts.add(inst);
+            }
+        }
+        
+        // algorithm from class note
+        for (Instruction inst : PhiInsts) {
+            HashSet<Integer> cluster = new HashSet<>();
+            HashSet<Integer> cluster_edges = new HashSet<>();
+            
+            Integer inst_number = inst.getInstNumber();
+            cluster.add(inst_number);
+            cluster_edges.addAll( interGraph.getOutEdges(inst_number) );
+            
+            for (Result operand : inst.getOperands()) {
+                if (operand.getType() == ResultType.CONSTANT)
+                    continue;
+                
+                Integer op_inst_number = operand.getInstNumber();
+                if ( !cluster_edges.contains(op_inst_number) ) {
+                    HashSet<Integer> out_edges = interGraph.getOutEdges(op_inst_number);
+                    cluster.add(op_inst_number);
+                    
+                    if (out_edges != null)
+                        cluster_edges.addAll( out_edges );
+                    
+                    interGraph.removeNode(op_inst_number);
+                }
+            }
+            
+            // remove the original nove
+            interGraph.removeNode(inst_number);
+            
+            // create cluster node
+            Integer clusterID = interGraph.getClusterCounter();
+            interGraph.addNode(clusterID);
+            for (Integer edge : cluster_edges) {
+                interGraph.addEdge(clusterID, edge);
+            }
+            interGraph.setCluster(clusterID);
+            interGraph.addCluster(clusterID, cluster);
+        }
+    }
+    
+    private void mergeClusters() {
+    
     }
 }

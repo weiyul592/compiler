@@ -19,31 +19,47 @@ import java.util.Collection;
 
 /* All the nodes are represented by integers */
 public class Graph {
-    private HashMap<Integer, Node> nodes;
+    private HashMap<Integer, Node> nodes;   // cluster number are numbered from 1000
     private HashMap<Integer, String> colors;
+    private HashMap<Integer, HashSet<Integer>> clusters;
+    private Integer clusterID;
     
     public class Node {
         private Integer nodeNumber;
-        private List<Integer> outEdges;
+        private HashSet<Integer> outEdges;
+        boolean is_cluster;
         
         public Node(Integer number) {
             nodeNumber = number;
-            outEdges = new ArrayList<>();
+            outEdges = new HashSet<>();
+            is_cluster = false;
         }
         
-        public Node(Integer number, List<Integer> edges) {
+        public Node(Integer number, HashSet<Integer> edges) {
             nodeNumber = number;
-            outEdges = new ArrayList<>(edges);
+            outEdges = new HashSet<>(edges);
         }
         
-        public void addEdge(Integer y) {
+        public void addEdge(Integer x) {
             // add an edge if has not been added before
-            if ( !outEdges.contains(y) ) {
-                outEdges.add(y);
+            if ( !outEdges.contains(x) ) {
+                outEdges.add(x);
             }
         }
         
-        public List<Integer> getEdges() {
+        public void removeEdge(Integer x) {
+            outEdges.remove(x);
+        }
+        
+        public void setCluster() {
+            is_cluster = true;
+        }
+        
+        public boolean isCluster() {
+            return is_cluster;
+        }
+        
+        public HashSet<Integer> getEdges() {
             return outEdges;
         }
         
@@ -55,6 +71,8 @@ public class Graph {
     public Graph() {
         nodes = new HashMap<>();
         colors = new HashMap<>();
+        clusters = new HashMap<>();
+        clusterID = 1000;
         
         // predefined color schemes
         colors.put(0, "black");
@@ -79,6 +97,20 @@ public class Graph {
         }
     }
     
+    public void removeNode(Integer x) {
+        Node node_x = nodes.get(x);
+        if (node_x == null)
+            return;
+        
+        HashSet<Integer> edges = node_x.getEdges();
+        for (Integer out_edge : edges) {
+            Node neighbor = nodes.get(out_edge);
+            neighbor.removeEdge(x);
+        }
+        
+        nodes.remove(x);
+    }
+    
     public void addEdge(Integer x, Integer y) {
         /* make sure x and y are added. If they are already in nodes, nothing is done */
         addNode(x);
@@ -90,7 +122,16 @@ public class Graph {
         node_x.addEdge(y);
         node_y.addEdge(x);
     }
- 
+
+    public void addCluster(Integer clusterID, HashSet<Integer> members) {
+        clusters.put(clusterID, members);
+    }
+    
+    public void setCluster(Integer clusterID) {
+        Node cluster_node = nodes.get(clusterID);
+        cluster_node.setCluster();
+    }
+    
     // return the node with corresponding name
     public Node getNode(Integer x) {
         if (nodes.containsKey(x)) {
@@ -111,15 +152,23 @@ public class Graph {
     }
     
     /* return all the nodes connected to node x */
-    public List<Integer> getOutEdges(Integer x) {
+    public HashSet<Integer> getOutEdges(Integer x) {
         Node node_x = nodes.get(x);
+        
+        if (node_x == null)
+            return null;
+        
         return node_x.getEdges();
+    }
+    
+    public Integer getClusterCounter() {
+        return clusterID++;
     }
     
     public void print() {
         for (Integer nodeName : nodes.keySet()) {
             Node node = nodes.get(nodeName);
-            List<Integer> outEdges = node.getEdges();
+            HashSet<Integer> outEdges = node.getEdges();
             
             System.out.print(nodeName + ": ");
             System.out.println(outEdges);
@@ -148,20 +197,39 @@ public class Graph {
         for (Integer key : nodes.keySet()) {
             Node original = nodes.get(key);
             Integer node_name = original.getNodeName();
-            Node new_node = new Node(node_name, original.getEdges());            
+            Node new_node = new Node(node_name, original.getEdges());      
+            if (original.is_cluster) {
+                new_node.setCluster();
+            }
+            
             nodes_copy.put(node_name, new_node);
         }
         
         for (Integer nodeName : nodes_copy.keySet()) {
             Node node = nodes_copy.get(nodeName);
-            List<Integer> outEdges = node.getEdges();
+            if (node.is_cluster) {
+                HashSet<Integer> cluster = clusters.get(nodeName);
+                
+                StringBuilder retString = new StringBuilder();
+                retString.append("\"" + nodeName + "\"");
+                retString.append("[label=\"");
+                retString.append(cluster.toString());
+                retString.append("\"]");
+                System.out.println(retString.toString());
+                
+            }
+        }
+        
+        for (Integer nodeName : nodes_copy.keySet()) {
+            Node node = nodes_copy.get(nodeName);
+            HashSet<Integer> outEdges = node.getEdges();
         
             for (Integer out_edge : outEdges) {
                 System.out.println(nodeName + "--" + out_edge);
                 
                 // do not print redundant edges
                 Node other_node = nodes_copy.get(out_edge);
-                List<Integer> other_node_edges = other_node.getEdges();
+                HashSet<Integer> other_node_edges = other_node.getEdges();
                 other_node_edges.remove(nodeName);
             }
         }
