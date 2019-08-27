@@ -90,24 +90,6 @@ public class Parser {
         
         //System.out.println("Def use chain before optimization");
         //DefUseChain.getInstance().print();
-        
-        /* copy propagation and common subexpression elimination */
-        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
-            CopyPropagation CPpass = new CopyPropagation();
-            CSEPass csePass = new CSEPass();
-            //System.out.println(cfg.getName());
-        
-            //CPpass.execute(cfg);
-            //csePass.execute(cfg);
-        }
-        
-        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
-            RegisterAllocator registerAllocator = new RegisterAllocator();
-            System.out.println(cfg.getName());
-            registerAllocator.execute(cfg);
-        }
-        
-        ControlFlowGraph.generateGraphFiles();
     }
 
     // check the current token and get the next token

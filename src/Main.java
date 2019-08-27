@@ -6,6 +6,8 @@
 import Backend.Liveness;
 import Backend.RegisterAllocator;
 import CFG.ControlFlowGraph;
+import Parser.CSEPass;
+import Parser.CopyPropagation;
 import Parser.Parser;
 
 import java.util.HashMap;
@@ -25,6 +27,22 @@ public class Main {
 //        Parser.getInstance().parsing("test/test006.txt");
 
         Parser.getInstance().parsing("test/test007.txt");
+        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
+            CopyPropagation CPpass = new CopyPropagation();
+            CSEPass csePass = new CSEPass();
+        
+            //CPpass.execute(cfg);
+            //csePass.execute(cfg);
+        }
+        
+        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
+            RegisterAllocator registerAllocator = new RegisterAllocator();
+            System.out.println(cfg.getName());
+            registerAllocator.execute(cfg);
+        }
+        
+        ControlFlowGraph.generateGraphFiles();
+        
 //        Parser.getInstance().parsing("test/test008.txt");
 //        Parser.getInstance().parsing("test/test009.txt");
 
