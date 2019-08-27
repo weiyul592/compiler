@@ -30,12 +30,6 @@ public class Main {
 
 //        Parser.getInstance().parsing("test/test010.txt");
 
-        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
-            RegisterAllocator registerAllocator = new RegisterAllocator();
-            System.out.println(cfg.getName());
-            registerAllocator.execute(cfg);
-        }
-
 //        Parser.getInstance().parsing("test/test011.txt");
 //        Parser.getInstance().parsing("test/test012.txt");
 //        Parser.getInstance().parsing("test/test013.txt");
@@ -47,5 +41,7 @@ public class Main {
 //        Parser.getInstance().parsing("test/test018.txt");
 //        Parser.getInstance().parsing("test/test019.txt");
 //        Parser.getInstance().parsing("test/test020.txt");
+
+        
     }
 }

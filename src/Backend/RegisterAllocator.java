@@ -26,9 +26,13 @@ import Backend.Graph.Node;
 public class RegisterAllocator {
     private HashMap< Instruction, Set<Integer> > liveRanges;
     private Graph interGraph;
+    private List<Instruction> PhiInsts;
+    private List<Instruction> PhiInstsToBeEliminated;
 
     public RegisterAllocator() {
         interGraph = new Graph();
+        PhiInsts = new ArrayList<>();
+        PhiInstsToBeEliminated = new ArrayList<>();
     }
 
     public void execute(ControlFlowGraph cfg) {
@@ -39,12 +43,13 @@ public class RegisterAllocator {
         // build interference graph
         buildGraph();
         coalesce(cfg);
-        interGraph.dumpGraph(null);
+        //interGraph.dumpGraph(null);
         
         List<Integer> elim_order = MCS();
-        
         HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
-        //interGraph.dumpGraph(coloring);
+        interGraph.dumpGraph(coloring);
+        
+        eliminatedPhi();
     }
 
     // build interference graph
@@ -136,8 +141,6 @@ public class RegisterAllocator {
     
     // coalsce live ranges for Phi nodes
     private void coalesce(ControlFlowGraph cfg) {
-        List<Instruction> PhiInsts = new ArrayList<>();
-        
         for (BasicBlock block : cfg.getBasicBlocks()) {
             for (Instruction inst : block.PHIInsts.values()) {
                 PhiInsts.add(inst);
@@ -170,10 +173,9 @@ public class RegisterAllocator {
                 }
             }
             
-            // remove the original nove
+            // replace the original node by cluster
             interGraph.removeNode(inst_number);
             
-            // create cluster node
             Integer clusterID = interGraph.getClusterCounter();
             interGraph.addNode(clusterID);
             for (Integer edge : cluster_edges) {
@@ -181,10 +183,29 @@ public class RegisterAllocator {
             }
             interGraph.setCluster(clusterID);
             interGraph.addCluster(clusterID, cluster);
+            
+            // This Phi Instruction can be eliminated
+            if (cluster.size() == 3) {
+                PhiInstsToBeEliminated.add(inst);
+            }
         }
     }
     
-    private void mergeClusters() {
-    
+    private void eliminatedPhi() {
+        HashSet<Instruction> eliminatedInsts = new HashSet<>();
+        
+        for (Instruction phi : PhiInstsToBeEliminated) {
+            BasicBlock block = phi.getBBl();
+            block.removeInst(phi);
+            
+            eliminatedInsts.add(phi);
+        }
+        
+        // for those phi instructions that have not been eliminated
+        for (Instruction phi : PhiInsts) {
+            if ( !eliminatedInsts.contains(phi) ) {
+                
+            }
+        }
     }
 }

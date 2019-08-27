@@ -11,6 +11,7 @@ package Parser;
  */
 
 // importing the scanner class
+import Backend.RegisterAllocator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -90,17 +91,23 @@ public class Parser {
         //System.out.println("Def use chain before optimization");
         //DefUseChain.getInstance().print();
         
-        ControlFlowGraph.generateGraphFiles();
-        
         /* copy propagation and common subexpression elimination */
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
-//            CopyPropagation CPpass = new CopyPropagation();
-//            CSEPass csePass = new CSEPass();
-//            System.out.println(cfg.getName());
+            CopyPropagation CPpass = new CopyPropagation();
+            CSEPass csePass = new CSEPass();
+            //System.out.println(cfg.getName());
         
-//            CPpass.execute(cfg);
-//            csePass.execute(cfg);
+            //CPpass.execute(cfg);
+            //csePass.execute(cfg);
         }
+        
+        for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
+            RegisterAllocator registerAllocator = new RegisterAllocator();
+            System.out.println(cfg.getName());
+            registerAllocator.execute(cfg);
+        }
+        
+        ControlFlowGraph.generateGraphFiles();
     }
 
     // check the current token and get the next token
