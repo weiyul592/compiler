@@ -19,6 +19,7 @@ import CFG.BasicBlock;
 import Lex.Result;
 import Lex.Result.ResultType;
 import Backend.Graph.Node;
+import SSA.DefUseChain;
 /**
  *
  * @author Weiyu, Amir
@@ -28,11 +29,13 @@ public class RegisterAllocator {
     private Graph interGraph;
     private List<Instruction> PhiInsts;
     private List<Instruction> PhiInstsToBeEliminated;
+    DefUseChain defUseChain;
 
     public RegisterAllocator() {
         interGraph = new Graph();
         PhiInsts = new ArrayList<>();
         PhiInstsToBeEliminated = new ArrayList<>();
+        defUseChain = DefUseChain.getInstance();
     }
 
     public void execute(ControlFlowGraph cfg) {
@@ -47,7 +50,7 @@ public class RegisterAllocator {
         
         List<Integer> elim_order = MCS();
         HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
-        interGraph.dumpGraph(coloring);
+        //interGraph.dumpGraph(coloring);
         
         eliminatedPhi();
     }
@@ -198,6 +201,7 @@ public class RegisterAllocator {
             BasicBlock block = phi.getBBl();
             block.removeInst(phi);
             
+            fixBranchDestination(phi);
             eliminatedInsts.add(phi);
         }
         
@@ -205,6 +209,28 @@ public class RegisterAllocator {
         for (Instruction phi : PhiInsts) {
             if ( !eliminatedInsts.contains(phi) ) {
                 
+            }
+        }
+    }
+    
+    // When phi instructions are eliminated, destinations of branch instructions need to be fixed
+    private void fixBranchDestination(Instruction phi) {
+        List<Instruction> uses = defUseChain.getUse(phi.getInstNumber());
+        
+        for (Instruction inst : uses) {
+            Opcode opcode = inst.getOpcode();
+            
+            if (opcode == Opcode.BRA) {
+                BasicBlock branchToBlock = phi.getBBl();
+                Instruction newBranchTo = branchToBlock.getFirstInst();
+                inst.setOperand1( Result.InstResult(newBranchTo.getInstNumber()) );
+            } else if (opcode == Opcode.BEQ || opcode == Opcode.BGE
+                || opcode == Opcode.BGT || opcode == Opcode.BLE
+                || opcode == Opcode.BLT || opcode == Opcode.BNE) {
+                
+                BasicBlock branchToBlock = phi.getBBl();
+                Instruction newBranchTo = branchToBlock.getFirstInst();
+                inst.setOperand2( Result.InstResult(newBranchTo.getInstNumber()) );
             }
         }
     }

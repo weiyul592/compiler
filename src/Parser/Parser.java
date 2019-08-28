@@ -87,9 +87,6 @@ public class Parser {
             //System.out.println(cfg.getName());
             //renamePass.print();
         }
-        
-        //System.out.println("Def use chain before optimization");
-        //DefUseChain.getInstance().print();
     }
 
     // check the current token and get the next token

@@ -16,31 +16,34 @@ import Lex.Result.ResultType;
  * @author Weiyu, Amir
  */
 public class DefUseChain {
-    private HashMap<Result, List<Instruction> > chains;
+    private HashMap<Integer, List<Instruction> > chains;
+    private HashMap<Integer, Result> resultMap;
     private static DefUseChain instance = new DefUseChain();
     
     private DefUseChain() {
         chains = new HashMap<>();
+        resultMap = new HashMap<>();
     }
     
     public static DefUseChain getInstance() {
         return instance;   
     }
     
-    public List<Instruction> getChain(Result key) {
+    public List<Instruction> getUse(Integer key) {
         return chains.get(key);
     }
     
     // append an instruction number (a use) to one chain
     private void append(Result key, Instruction inst) {
         List<Instruction> chain;
-        if (!chains.containsKey(key)) {
+        if (!chains.containsKey(key.getInstNumber())) {
             chain = new ArrayList<>();
             chain.add(inst);
             
-            chains.put(key, chain);
+            chains.put(key.getInstNumber(), chain);
+            resultMap.put(key.getInstNumber(), key);
         } else {
-            chain = chains.get(key);
+            chain = chains.get(key.getInstNumber());
             chain.add(inst);
         }
         // chains.get(key)
@@ -60,7 +63,8 @@ public class DefUseChain {
     }
     
     public void print() {
-        for (Result key: chains.keySet()) {
+        for (Integer inst_number: chains.keySet()) {
+            Result key = resultMap.get(inst_number);
             StringBuilder retString = new StringBuilder();
             if (key.getType() == ResultType.VARIABLE) {
                 retString.append(key.getName() + key.getInstNumber());
@@ -69,7 +73,11 @@ public class DefUseChain {
             }
             
             retString.append(": " + key.getType() + " -> ");
-            retString.append(chains.get(key));
+            List<Instruction> insts = chains.get(inst_number);
+            for (Instruction inst : insts) {
+                retString.append(inst.toStr());
+                retString.append(", ");
+            }
             System.out.println(retString.toString());
         }
     }
