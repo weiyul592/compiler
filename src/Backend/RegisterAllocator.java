@@ -20,6 +20,7 @@ import Lex.Result;
 import Lex.Result.ResultType;
 import Backend.Graph.Node;
 import SSA.DefUseChain;
+import java.util.Objects;
 /**
  *
  * @author Weiyu, Amir
@@ -50,9 +51,9 @@ public class RegisterAllocator {
         
         List<Integer> elim_order = MCS();
         HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
-        //interGraph.dumpGraph(coloring);
+        interGraph.dumpGraph(coloring);
         
-        eliminatedPhi();
+        eliminatedPhi(coloring, cfg);
     }
 
     // build interference graph
@@ -119,6 +120,14 @@ public class RegisterAllocator {
         
         for (Integer node_name : interGraph.getNodeNames()) {
             coloring.put(node_name, -1);
+            
+            Node node = interGraph.getNode(node_name);
+            if (node.isCluster()) {
+                HashSet<Integer> cluster = interGraph.getCluster(node_name);
+                for (Integer member : cluster) {
+                    coloring.put(member, -1);
+                }
+            }
         }
         
         for (Integer node_id : interGraph.getNodeNames()) {
@@ -136,7 +145,14 @@ public class RegisterAllocator {
             while (neighbor_colors.contains(lowest_color)) {
                 lowest_color++;
             }
+            
             coloring.put(node_id, lowest_color);
+            if (node.isCluster()) {
+                HashSet<Integer> cluster = interGraph.getCluster(node_id);
+                for (Integer member : cluster) {
+                    coloring.put(member, lowest_color);
+                }
+            }
         }
         
         return coloring;
@@ -194,23 +210,95 @@ public class RegisterAllocator {
         }
     }
     
-    private void eliminatedPhi() {
-        HashSet<Instruction> eliminatedInsts = new HashSet<>();
-        
-        for (Instruction phi : PhiInstsToBeEliminated) {
+    private void eliminatedPhi(HashMap<Integer, Integer> coloring, ControlFlowGraph cfg) {
+        // HashSet<Instruction> eliminatedInsts = new HashSet<>();
+                
+        // Insert move instructions
+        for (Instruction phi : PhiInsts) {
+            if ( !PhiInstsToBeEliminated.contains(phi) ) {
+                int inst_color = coloring.get(phi.getInstNumber());
+                
+                List<Result> operands = phi.getOperands();
+                List<Integer> colors = new ArrayList<>();
+                for (Result operand : operands)
+                    colors.add( coloring.get(operand.getInstNumber()) );
+                
+                if (colors.size() == 2) {
+                    int op1_color = colors.get(0);
+                    if (op1_color != inst_color) {
+                        Instruction op1_def = cfg.getInstruction(operands.get(0).getInstNumber());
+                        BasicBlock phiBlock = phi.getBBl();
+                        BasicBlock op1_def_block = op1_def.getBBl();
+                        Integer index = search(phiBlock, op1_def_block);
+                        
+                        BasicBlock parent = phiBlock.getParent().get(index);
+			Instruction old_last = parent.getLastInst();
+                        Instruction newInst = Instruction.addNewInst(parent, Opcode.MOVE, operands.get(0), Result.InstResult(phi.getInstNumber()));
+
+                        Opcode opcode = old_last.getOpcode();
+                        if (opcode == Opcode.BEQ || opcode == Opcode.BGE
+                            || opcode == Opcode.BGT || opcode == Opcode.BLE
+                            || opcode == Opcode.BLT || opcode == Opcode.BNE
+                            || opcode == Opcode.BRA) {
+                            parent.InsertBefore(newInst, old_last);
+                        }
+                    }
+
+                    int op2_color = colors.get(1);
+                    if (op2_color != inst_color) {
+                        phi.print();
+                        Instruction op2_def = cfg.getInstruction(operands.get(1).getInstNumber());
+                        BasicBlock phiBlock = phi.getBBl();
+                        BasicBlock op2_def_block = op2_def.getBBl();
+                        Integer index = search(phiBlock, op2_def_block);
+                        
+                        BasicBlock parent = phiBlock.getParent().get(index);
+			Instruction old_last = parent.getLastInst();
+                        Instruction newInst = Instruction.addNewInst(parent, Opcode.MOVE, operands.get(1), Result.InstResult(phi.getInstNumber()));
+
+                        Opcode opcode = old_last.getOpcode();
+                        if (opcode == Opcode.BEQ || opcode == Opcode.BGE
+                            || opcode == Opcode.BGT || opcode == Opcode.BLE
+                            || opcode == Opcode.BLT || opcode == Opcode.BNE
+                            || opcode == Opcode.BRA) {
+                            parent.InsertBefore(newInst, old_last);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Instruction phi : PhiInsts) {
             BasicBlock block = phi.getBBl();
             block.removeInst(phi);
             
             fixBranchDestination(phi);
-            eliminatedInsts.add(phi);
+        }
+
+    }
+    
+    /* phiBlock: the basic block containing the phi instruction
+     * op_def_block: the basic block containing the definition of one of the phi instruction's operands
+     *
+     * return: the index of the phiBlock's parent that is dominated by op_def_block
+     */
+    private Integer search(BasicBlock phiBlock, BasicBlock op_def_block) {
+        BasicBlock dominator = phiBlock.getImmeDominator();
+        List<BasicBlock> parents = phiBlock.getParent();
+        for (int index = 0; index < parents.size(); index++) {
+            BasicBlock currBlock = parents.get(index);
+            while (currBlock != dominator) {
+                if (currBlock == op_def_block)
+                   return index;
+
+                currBlock = currBlock.getImmeDominator();
+            }
+            
+            if (currBlock == op_def_block)
+                return index;
         }
         
-        // for those phi instructions that have not been eliminated
-        for (Instruction phi : PhiInsts) {
-            if ( !eliminatedInsts.contains(phi) ) {
-                
-            }
-        }
+        return null;
     }
     
     // When phi instructions are eliminated, destinations of branch instructions need to be fixed

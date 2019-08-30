@@ -22,12 +22,13 @@ public class Graph {
     private HashMap<Integer, Node> nodes;   // cluster number are numbered from 1000
     private HashMap<Integer, String> colors;
     private HashMap<Integer, HashSet<Integer>> clusters;
+    private HashMap<Integer, Integer> nodeToClusterID;
     private Integer clusterID;
     
     public class Node {
         private Integer nodeNumber;
         private HashSet<Integer> outEdges;
-        boolean is_cluster;
+        private boolean is_cluster;
         
         public Node(Integer number) {
             nodeNumber = number;
@@ -72,6 +73,7 @@ public class Graph {
         nodes = new HashMap<>();
         colors = new HashMap<>();
         clusters = new HashMap<>();
+        nodeToClusterID = new HashMap<>();
         clusterID = 1000;
         
         // predefined color schemes
@@ -125,6 +127,10 @@ public class Graph {
 
     public void addCluster(Integer clusterID, HashSet<Integer> members) {
         clusters.put(clusterID, members);
+        
+        for (Integer member : members) {
+            nodeToClusterID.put(member, clusterID);
+        }
     }
     
     public void setCluster(Integer clusterID) {
@@ -163,6 +169,14 @@ public class Graph {
     
     public Integer getClusterCounter() {
         return clusterID++;
+    }
+    
+    public Integer getClusterID(Integer nodeID) {
+        return nodeToClusterID.get(nodeID);
+    }
+    
+    public HashSet<Integer> getCluster(Integer clusterID) {
+        return clusters.get(clusterID);
     }
     
     public void print() {
