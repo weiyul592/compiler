@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Lex.Result;
+import SSA.DefUseChain;
 import SSA.Instruction;
 import SSA.Opcode;
 
@@ -228,6 +229,47 @@ public class BasicBlock {
         }
     }
     
+    // insert a new instruction before position
+    public void InsertBefore(Instruction newInst, Instruction position) {
+        BasicBlock block1 = newInst.getBBl();
+        BasicBlock block2 = position.getBBl();
+
+        if (block1 != block2) {
+            System.out.println("Invalid insertion\n");
+            return;
+        }
+
+        // link instructions
+        Instruction before_position = position.getPrevious();
+
+        newInst.setPrevious(before_position);
+        if (before_position != null)
+            before_position.setNext(newInst);
+        newInst.setNext(position);
+        position.setPrevious(newInst);
+
+        if (position == block2.getFirstInst()) {
+            block2.setFirstInst(newInst);
+
+            // update branch destinations
+            DefUseChain defUseChain = DefUseChain.getInstance();
+            List<Instruction> uses = defUseChain.getUse(position.getInstNumber());
+
+            for (Instruction inst : uses) {
+                Opcode opcode = inst.getOpcode();
+
+                if (opcode == Opcode.BRA) {
+                    inst.setOperand1( Result.InstResult(newInst.getInstNumber()) );
+                } else if (opcode == Opcode.BEQ || opcode == Opcode.BGE
+                    || opcode == Opcode.BGT || opcode == Opcode.BLE
+                    || opcode == Opcode.BLT || opcode == Opcode.BNE) {
+
+                    inst.setOperand2( Result.InstResult(newInst.getInstNumber()) );
+                }
+            }
+        }
+    }
+
     public static BasicBlock getCurrent() { return currentBBl; }
     public Instruction getFirstInst() { return this.FirstInst; }
     public Instruction getLastInst() { return this.LastInst; }
