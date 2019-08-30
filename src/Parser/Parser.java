@@ -512,7 +512,9 @@ public class Parser {
 
             Instruction ElsePart_LastInst = statSequence();
 
-            FixUPBraInst.setOperand2(Result.InstResult( BranchBl.getFirstInst().getInstNumber() ) );
+            Result branchToResult = Result.InstResult( BranchBl.getFirstInst().getInstNumber() );
+            FixUPBraInst.setOperand2(branchToResult);
+            DefUseChain.getInstance().addUse(branchToResult, FixUPBraInst); // update def-use chain
             
             fallThroughBl = ThenPart_LastInst.getBBl();
             fallThroughBl.setBranchBlock(joinBlock);
@@ -536,8 +538,10 @@ public class Parser {
         } else {
             BasicBlock_Initial.setBranchBlock(joinBlock);
 
-            FixUPBraInst.setOperand2(Result.InstResult(joinBlock.getFirstInst().getInstNumber()));
-           
+            Result branchToResult = Result.InstResult(joinBlock.getFirstInst().getInstNumber());
+            FixUPBraInst.setOperand2(branchToResult);
+            DefUseChain.getInstance().addUse(branchToResult, FixUPBraInst);
+            
             // connects fall through block to join block
             fallThroughBl = ThenPart_LastInst.getBBl();
             fallThroughBl.setFallThroughBl(joinBlock);

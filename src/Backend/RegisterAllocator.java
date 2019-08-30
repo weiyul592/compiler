@@ -51,9 +51,10 @@ public class RegisterAllocator {
         
         List<Integer> elim_order = MCS();
         HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
-        interGraph.dumpGraph(coloring);
+        //interGraph.dumpGraph(coloring);
         
         eliminatedPhi(coloring, cfg);
+        defUseChain.print();
     }
 
     // build interference graph
@@ -246,7 +247,6 @@ public class RegisterAllocator {
 
                     int op2_color = colors.get(1);
                     if (op2_color != inst_color) {
-                        phi.print();
                         Instruction op2_def = cfg.getInstruction(operands.get(1).getInstNumber());
                         BasicBlock phiBlock = phi.getBBl();
                         BasicBlock op2_def_block = op2_def.getBBl();
@@ -271,10 +271,8 @@ public class RegisterAllocator {
         for (Instruction phi : PhiInsts) {
             BasicBlock block = phi.getBBl();
             block.removeInst(phi);
-            
             fixBranchDestination(phi);
         }
-
     }
     
     /* phiBlock: the basic block containing the phi instruction
@@ -304,21 +302,46 @@ public class RegisterAllocator {
     // When phi instructions are eliminated, destinations of branch instructions need to be fixed
     private void fixBranchDestination(Instruction phi) {
         List<Instruction> uses = defUseChain.getUse(phi.getInstNumber());
+        HashMap<Result, List<Instruction> > removeMap = new HashMap<>();
         
         for (Instruction inst : uses) {
             Opcode opcode = inst.getOpcode();
+            Result oldBranchToResult = null;
             
             if (opcode == Opcode.BRA) {
                 BasicBlock branchToBlock = phi.getBBl();
                 Instruction newBranchTo = branchToBlock.getFirstInst();
-                inst.setOperand1( Result.InstResult(newBranchTo.getInstNumber()) );
+                oldBranchToResult = inst.getOperand1();
+                Result newBranchToResult = Result.InstResult(newBranchTo.getInstNumber());
+                inst.setOperand1(newBranchToResult);
+                
+                defUseChain.addUse(newBranchToResult, inst);
             } else if (opcode == Opcode.BEQ || opcode == Opcode.BGE
                 || opcode == Opcode.BGT || opcode == Opcode.BLE
                 || opcode == Opcode.BLT || opcode == Opcode.BNE) {
                 
                 BasicBlock branchToBlock = phi.getBBl();
                 Instruction newBranchTo = branchToBlock.getFirstInst();
-                inst.setOperand2( Result.InstResult(newBranchTo.getInstNumber()) );
+                oldBranchToResult = inst.getOperand2();
+                Result newBranchToResult = Result.InstResult(newBranchTo.getInstNumber());
+                inst.setOperand2(newBranchToResult);
+                
+                defUseChain.addUse(newBranchToResult, inst);
+            }
+            
+            // add to removeMap
+            List<Instruction> removeList = removeMap.get(oldBranchToResult);
+            if (removeList == null) {
+                removeList = new ArrayList<>();
+                removeMap.put(oldBranchToResult, removeList);
+            }
+            removeList.add(inst);
+        }
+        
+        for (Result key : removeMap.keySet()) {
+            List<Instruction> removeList = removeMap.get(key);
+            for (Instruction inst : removeList) {
+                defUseChain.removeUse(key, inst);
             }
         }
     }

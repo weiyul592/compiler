@@ -58,6 +58,21 @@ public class DefUseChain {
         }
     }
     
+    public void removeUse(Result key, Instruction use) {
+        if (key == null)
+            return;
+        
+        if (key.getType() == ResultType.VARIABLE || key.getType() == ResultType.INSTRUCTION) {
+            if (!chains.containsKey(key.getInstNumber()))
+                return;
+            else {
+                List<Instruction> chain = chains.get(key.getInstNumber());
+                chain.remove(use);
+            }
+            
+        }
+    }
+    
     public void clear() {
         chains.clear();;
     }
