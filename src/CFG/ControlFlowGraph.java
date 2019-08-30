@@ -34,12 +34,14 @@ public class ControlFlowGraph {
     private List<BasicBlock> basicBlocks;
     private String name;
     private Integer basicBlockCounter;
+    private Integer InstCounter;
 
     private ControlFlowGraph(String name) {
         this.name = name;
         basicBlocks = new ArrayList<>();
         basicBlockCounter = 0;
         instructions = new HashMap<>();
+        InstCounter = 1;
         symbolTable = new SymbolTable();
     }
 
@@ -90,6 +92,14 @@ public class ControlFlowGraph {
         return instructions.get(index);
     }
 
+    public int getInstCounter() {
+        return InstCounter;
+    }
+    
+    public void incrInstCounter() {
+        InstCounter++;
+    }
+    
     public List<BasicBlock> getBasicBlocks() {
         return basicBlocks;
     }

@@ -26,6 +26,7 @@ public class BasicBlock {
     public HashMap<String, Instruction> PHIInsts;
     private List<BasicBlock> ImmediateDominations;
     private BasicBlock dominator;
+    private ControlFlowGraph cfg;
     
     public Integer BBNum;
     private BasicBlock FallThroughBl;
@@ -49,7 +50,10 @@ public class BasicBlock {
 
     public static BasicBlock newBBl() {
         BasicBlock BBl = new BasicBlock();
-        ControlFlowGraph.getCurrent().addBasicBlock(BBl);
+        ControlFlowGraph currentCFG = ControlFlowGraph.getCurrent();
+        currentCFG.addBasicBlock(BBl);
+        BBl.cfg = currentCFG;
+        
         return BBl;
     }
 
@@ -280,6 +284,7 @@ public class BasicBlock {
     public List<BasicBlock> getChildrenBlock() { return this.childrenBlock; }
     public BasicBlock getImmeDominator() { return this.dominator; }
     public List<BasicBlock> getImmediateDominations() { return this.ImmediateDominations; }
+    public ControlFlowGraph getCFG() { return this.cfg; }
     
     public void print() {
         if (FirstInst == null || LastInst == null) {

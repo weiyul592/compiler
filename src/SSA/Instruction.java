@@ -18,7 +18,6 @@ import SSA.DefUseChain;
  * @author Weiyu, Amir
  */
 public class Instruction {
-    private static int InstCounter = 1;
     private int InstNumber;
     private Opcode opcode;
     private Result operand1;
@@ -32,14 +31,17 @@ public class Instruction {
     public List<Instruction> BranchDestinationsList;
     
     public Instruction(BasicBlock BBl, Opcode opcode, Result operand1, Result operand2) {
-        this.InstNumber = InstCounter++;
+        ControlFlowGraph cfg = BBl.getCFG();
+        this.InstNumber = cfg.getInstCounter();
+        cfg.incrInstCounter();
+        
         this.opcode = opcode;
         this.operand1 = operand1;
         this.operand2 = operand2;
         this.BBl = BBl;
         this.BranchDestinationsList = new ArrayList<>();
         BBl.AddInst(this);
-        ControlFlowGraph.getCurrent().addInstruction(this);
+        cfg.addInstruction(this);
     }
 
     public static Instruction addNewInst(BasicBlock bbl, Opcode opcode, Result operand1, Result operand2) {
@@ -157,10 +159,6 @@ public class Instruction {
         return addNewInst(Opcode.WRITENL, null, null);
     }
     
-    public static void resetInstCounter() {
-        InstCounter = 1;
-    }
-    
     public static Instruction PHI(BasicBlock BB, Result designator, Result op1, Result op2) {
         Instruction PhiInstruction = addNewInst(BB, Opcode.PHI, op1, op2);
         PhiInstruction.affectedVariable = designator.getName();
@@ -264,7 +262,6 @@ public class Instruction {
         System.out.println(InstNumber + " " + opcode + " " + op1 + " " + op2);
     }
 
-    public static int getCurrInstCounter () { return InstCounter; }
     public int getInstNumber () { return this.InstNumber; }
     public Opcode getOpcode() { return this.opcode; }
     public Result getOperand1 () { return this.operand1; }

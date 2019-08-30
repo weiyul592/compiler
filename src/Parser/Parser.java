@@ -127,7 +127,6 @@ public class Parser {
         symbolTable = ControlFlowGraph.getMain().getSymbolTable();
         
         //symbolTable.resetValueList();
-        Instruction.resetInstCounter();
         BasicBlock mainBBl = BasicBlock.newBBl();
         BasicBlock.setCurrent( mainBBl );
         
@@ -229,7 +228,6 @@ public class Parser {
         BasicBlock funcBBl = BasicBlock.newBBl();
         BasicBlock.setCurrent(funcBBl);
         // symbolTable.resetValueList();
-        Instruction.resetInstCounter();
         
         IsToken(Token.semiToken);
         funcBody();
@@ -351,7 +349,7 @@ public class Parser {
                 // Result valueB4Move = symbolTable.getLastValue(desigResult.getName());
                 Integer ListSizeB4Move = symbolTable.getValueSize( desigResult.getName() );
                 
-                desigResult = symbolTable.updateTable(desigResult, Instruction.getCurrInstCounter());
+                desigResult = symbolTable.updateTable(desigResult, ControlFlowGraph.getCurrent().getInstCounter());
                 retInst = Instruction.move(exp, desigResult);
                 if (BasicBlock.getCurrent().getJoinBl() != null) {
                     addPhiInstruction(desigResult, ListSizeB4Move /*, valueB4Move, desigResult*/);

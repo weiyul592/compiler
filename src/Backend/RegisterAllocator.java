@@ -54,7 +54,7 @@ public class RegisterAllocator {
         //interGraph.dumpGraph(coloring);
         
         eliminatedPhi(coloring, cfg);
-        defUseChain.print();
+        //defUseChain.print();
     }
 
     // build interference graph
@@ -255,7 +255,7 @@ public class RegisterAllocator {
                         BasicBlock parent = phiBlock.getParent().get(index);
 			Instruction old_last = parent.getLastInst();
                         Instruction newInst = Instruction.addNewInst(parent, Opcode.MOVE, operands.get(1), Result.InstResult(phi.getInstNumber()));
-
+                        
                         Opcode opcode = old_last.getOpcode();
                         if (opcode == Opcode.BEQ || opcode == Opcode.BGE
                             || opcode == Opcode.BGT || opcode == Opcode.BLE
