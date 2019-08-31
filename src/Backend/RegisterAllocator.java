@@ -28,12 +28,14 @@ import java.util.Objects;
 public class RegisterAllocator {
     private HashMap< Instruction, Set<Integer> > liveRanges;
     private Graph interGraph;
+    private HashMap<Integer, Integer> coloring;
     private List<Instruction> PhiInsts;
     private List<Instruction> PhiInstsToBeEliminated;
     DefUseChain defUseChain;
 
     public RegisterAllocator() {
         interGraph = new Graph();
+        coloring = new HashMap<>();
         PhiInsts = new ArrayList<>();
         PhiInstsToBeEliminated = new ArrayList<>();
         defUseChain = DefUseChain.getInstance();
@@ -50,7 +52,7 @@ public class RegisterAllocator {
         //interGraph.dumpGraph(null);
         
         List<Integer> elim_order = MCS();
-        HashMap<Integer, Integer> coloring = greedy_coloring(elim_order);
+        greedy_coloring(elim_order);
         //interGraph.dumpGraph(coloring);
         
         eliminatedPhi(coloring, cfg);
@@ -116,9 +118,7 @@ public class RegisterAllocator {
     }
     
     /* greedy coloring algorithm */
-    private HashMap<Integer, Integer> greedy_coloring(List<Integer> elim_order) {
-        HashMap<Integer, Integer> coloring = new HashMap<>();
-        
+    private void greedy_coloring(List<Integer> elim_order) {
         for (Integer node_name : interGraph.getNodeNames()) {
             coloring.put(node_name, -1);
             
@@ -155,8 +155,6 @@ public class RegisterAllocator {
                 }
             }
         }
-        
-        return coloring;
     }
     
     // coalsce live ranges for Phi nodes
@@ -344,5 +342,9 @@ public class RegisterAllocator {
                 defUseChain.removeUse(key, inst);
             }
         }
+    }
+    
+    public HashMap<Integer, Integer> getColoring() { 
+        return coloring;
     }
 }
