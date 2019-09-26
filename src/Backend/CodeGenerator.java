@@ -51,6 +51,7 @@ public class CodeGenerator {
         printInsts();
         generateMachineCode();
         
+        /*
         programs.add(DLX.assemble(DLX.ADDI, 1, DF, -16));
         programs.add(DLX.assemble(DLX.ADDI, RP1, 0, 51));
         programs.add(DLX.assemble(DLX.STW, RP1, 1, 0));
@@ -61,6 +62,7 @@ public class CodeGenerator {
         programs.add(DLX.assemble(DLX.STW, 1, 2, 0));
         programs.add(DLX.assemble(DLX.LDW, 1, 2, 0));
         programs.add(DLX.assemble(DLX.WRD, 1));
+        */
         
         programs.add(DLX.assemble(DLX.RET, 0));
     }
@@ -104,29 +106,78 @@ public class CodeGenerator {
     
     public void generateMachineCode() {
         for (int i = 0; i < instructions.size(); i++) {
+            if (i == 3) break;
+            
             Instruction currInst = instructions.get(i);
             Opcode opcode = currInst.getOpcode();
+            Result operand1 = currInst.getOperand1();
+            Result operand2 = currInst.getOperand2();
+            HashMap<Integer, Integer> registers = currScope.getRegisters();
+            Integer MachineCode = null;
             
-            if (opcode == Opcode.ADD) {
-                generateMathCode(currInst, DLX.ADD);
+            switch (opcode) {
+                case ADD:
+                    MachineCode = generateMathCode(currInst, DLX.ADD);
+                    break;
+                case ADDA:
+                case SUB:
+                case MUL:
+                case DIV:
+                    System.out.println("math op not implemented");
+                    break;
+                case STORE:
+                    if (operand1.getType() == ResultType.CONSTANT) {
+                        programs.add( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
+                        Integer R1 = registers.get(operand2.getInstNumber());
+                        MachineCode = DLX.assemble(DLX.STW, RP1, R1, 0);
+                    } else if (operand1.getType() == ResultType.INSTRUCTION) {
+                        
+                    }
+                    
+                    break;
+                case LOAD:
+                    Integer destReg = registers.get(currInst.getInstNumber());
+                    Integer R1 = registers.get(operand1.getInstNumber());
+                    MachineCode = DLX.assemble(DLX.LDW, destReg, R1, 0);
+                    break;
+                default:
+                    break;
+            }
+            
+            if (MachineCode != null) {
+                programs.add(MachineCode);
+            } else {
+                System.out.println("Woops: " + opcode);
             }
         }
     }
     
-    public void generateMathCode(Instruction inst, int opcode) {
+    public Integer generateMathCode(Instruction inst, int opcode) {
         Result operand1 = inst.getOperand1();
         Result operand2 = inst.getOperand2();
+        ResultType op1_type = operand1.getType();
+        ResultType op2_type = operand2.getType();
         HashMap<Integer, Integer> registers = currScope.getRegisters();
         
-        if (operand1.getType() == ResultType.ADDRESS) {
+        // colors are assigned from 0
+        Integer destReg = registers.get( inst.getInstNumber() ) + 1;
+        
+        if (op1_type == ResultType.ADDRESS) {
             // get address of global variables
-            if (operand2.getType() == ResultType.CONSTANT) {
-                Integer destReg = registers.get( inst.getInstNumber() );
-                programs.add(DLX.assemble(opcode, destReg, DF, operand2.getConstValue()));
+            if (op2_type == ResultType.CONSTANT) {
+                System.out.println(destReg);
+                return DLX.assemble(opcode + 16, destReg, DF, operand2.getConstValue());
             } else {
                 System.out.println("Add DF nonconstant");
             }
+        } else if (op1_type == ResultType.VARIABLE && op2_type == ResultType.CONSTANT) {
+            Integer R1 = registers.get( operand1.getInstNumber() );
+            return DLX.assemble(opcode, destReg, R1, operand2.getConstValue());
+        } else if (op1_type == ResultType.CONSTANT && op2_type == ResultType.VARIABLE) {
+            System.out.println("ADD CONST VAR");
         }
+        
+        return null;
     }
     
     public void execute() throws IOException {
