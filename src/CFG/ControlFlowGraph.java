@@ -28,7 +28,8 @@ public class ControlFlowGraph {
     private static Map<String, ControlFlowGraph> controlFlowGraphs;
     private static ControlFlowGraph current;
     private HashMap<Integer, Instruction> instructions;
-    public SymbolTable symbolTable;
+    private SymbolTable symbolTable;
+    private HashMap<Integer, Integer> registers;
 
     // Instance
     private List<BasicBlock> basicBlocks;
@@ -127,6 +128,15 @@ public class ControlFlowGraph {
         else 
             return basicBlocks.get(0);
     }
+    
+    public void attachRegisters(HashMap<Integer, Integer> coloring) {
+        this.registers = coloring;
+    }
+    
+    public HashMap<Integer, Integer> getRegisters () {
+        return registers;
+    }
+    
     // *** print
     public void print() {
         for ( Integer index : current.instructions.keySet() ) {

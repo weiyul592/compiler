@@ -57,6 +57,8 @@ public class RegisterAllocator {
         
         eliminatedPhi(coloring, cfg);
         //defUseChain.print();
+        
+        cfg.attachRegisters(coloring);
     }
 
     // build interference graph
