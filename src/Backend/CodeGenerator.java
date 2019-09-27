@@ -30,6 +30,7 @@ public class CodeGenerator {
     //List<ControlFlowGraph> functions;
     List<Integer> programs;
     List<Instruction> instructions;
+    HashMap<Integer, Integer> registers;
     
     static final int DF = 30;
     static final int FP = 28;
@@ -47,33 +48,25 @@ public class CodeGenerator {
         initialize();
         generateControlFlow(mainScope);
         currScope = mainScope;
+        loadRegisters(currScope);
         
-        printInsts();
+        // printInsts();
         generateMachineCode();
         
-        /*
-        programs.add(DLX.assemble(DLX.ADDI, 1, DF, -16));
-        programs.add(DLX.assemble(DLX.ADDI, RP1, 0, 51));
-        programs.add(DLX.assemble(DLX.STW, RP1, 1, 0));
-        programs.add(DLX.assemble(DLX.LDW, 1, 1, 0));
-        programs.add(DLX.assemble(DLX.MULI, 1, 1, 2));
-        
-        programs.add(DLX.assemble(DLX.ADDI, 2, DF, -20));
-        programs.add(DLX.assemble(DLX.STW, 1, 2, 0));
-        programs.add(DLX.assemble(DLX.LDW, 1, 2, 0));
-        programs.add(DLX.assemble(DLX.WRD, 1));
-        */
-        
-        programs.add(DLX.assemble(DLX.RET, 0));
+        stopProcessing();
     }
     
-    public void initialize() {
+    private void initialize() {
         Integer globalSize = MemoryAllocator.getInstance().getGlobalCounter();
         programs.add(DLX.assemble(DLX.ADDI, FP, 30, globalSize * -4));
         programs.add(DLX.assemble(DLX.ADD, SP, FP, 0));
     }   
     
-    public void generateControlFlow(ControlFlowGraph cfg) {
+    private void stopProcessing() {
+        programs.add(DLX.assemble(DLX.RET, 0));
+    }
+    
+    private void generateControlFlow(ControlFlowGraph cfg) {
         BasicBlock entryBlock = cfg.getEntryBlock();
         Set<BasicBlock> visited = new HashSet<>();
         
@@ -96,7 +89,7 @@ public class CodeGenerator {
         }
     }
     
-    public void addInstructions(BasicBlock block) {
+    private void addInstructions(BasicBlock block) {
         Instruction currInst = block.getFirstInst();
         while (currInst != null && currInst != block.getLastInst().getNext()) {
             instructions.add(currInst);
@@ -104,16 +97,16 @@ public class CodeGenerator {
         }
     }
     
-    public void generateMachineCode() {
+    private void generateMachineCode() {
         for (int i = 0; i < instructions.size(); i++) {
-            if (i == 3) break;
+            if (i == 8) break;
             
             Instruction currInst = instructions.get(i);
             Opcode opcode = currInst.getOpcode();
             Result operand1 = currInst.getOperand1();
             Result operand2 = currInst.getOperand2();
-            HashMap<Integer, Integer> registers = currScope.getRegisters();
             Integer MachineCode = null;
+            Integer R1, R2, destReg;
             
             switch (opcode) {
                 case ADD:
@@ -122,23 +115,31 @@ public class CodeGenerator {
                 case ADDA:
                 case SUB:
                 case MUL:
+                    MachineCode = generateMathCode(currInst, DLX.MUL);
+                    break;
                 case DIV:
                     System.out.println("math op not implemented");
                     break;
                 case STORE:
                     if (operand1.getType() == ResultType.CONSTANT) {
                         programs.add( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
-                        Integer R1 = registers.get(operand2.getInstNumber());
-                        MachineCode = DLX.assemble(DLX.STW, RP1, R1, 0);
+                        R2 = getRegister(operand2.getInstNumber());
+                        MachineCode = DLX.assemble(DLX.STW, RP1, R2, 0);
                     } else if (operand1.getType() == ResultType.INSTRUCTION) {
-                        
+                        R1 = getRegister(operand1.getInstNumber());
+                        R2 = getRegister(operand2.getInstNumber());
+                        MachineCode = DLX.assemble(DLX.STW, R1, R2, 0);
                     }
                     
                     break;
                 case LOAD:
-                    Integer destReg = registers.get(currInst.getInstNumber());
-                    Integer R1 = registers.get(operand1.getInstNumber());
+                    destReg = getRegister(currInst.getInstNumber());
+                    R1 = getRegister(operand1.getInstNumber());
                     MachineCode = DLX.assemble(DLX.LDW, destReg, R1, 0);
+                    break;
+                case WRITE:
+                    R1 = getRegister(operand1.getInstNumber());
+                    MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
                 default:
                     break;
@@ -152,29 +153,27 @@ public class CodeGenerator {
         }
     }
     
-    public Integer generateMathCode(Instruction inst, int opcode) {
+    private Integer generateMathCode(Instruction inst, int opcode) {
         Result operand1 = inst.getOperand1();
         Result operand2 = inst.getOperand2();
         ResultType op1_type = operand1.getType();
         ResultType op2_type = operand2.getType();
-        HashMap<Integer, Integer> registers = currScope.getRegisters();
         
-        // colors are assigned from 0
-        Integer destReg = registers.get( inst.getInstNumber() ) + 1;
+        Integer destReg = getRegister( inst.getInstNumber() );
         
         if (op1_type == ResultType.ADDRESS) {
             // get address of global variables
             if (op2_type == ResultType.CONSTANT) {
-                System.out.println(destReg);
                 return DLX.assemble(opcode + 16, destReg, DF, operand2.getConstValue());
             } else {
                 System.out.println("Add DF nonconstant");
             }
         } else if (op1_type == ResultType.VARIABLE && op2_type == ResultType.CONSTANT) {
-            Integer R1 = registers.get( operand1.getInstNumber() );
-            return DLX.assemble(opcode, destReg, R1, operand2.getConstValue());
+            Integer R1 = getRegister( operand1.getInstNumber() );
+            return DLX.assemble(opcode + 16, destReg, R1, operand2.getConstValue());
         } else if (op1_type == ResultType.CONSTANT && op2_type == ResultType.VARIABLE) {
-            System.out.println("ADD CONST VAR");
+            Integer R2 = getRegister( operand2.getInstNumber() );
+            return DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue());
         }
         
         return null;
@@ -185,9 +184,27 @@ public class CodeGenerator {
         DLX.execute();
     }
     
+    private void loadRegisters(ControlFlowGraph scope) {
+        registers = scope.getRegisters();
+    }
+    
+    private Integer getRegister(Integer key) {
+        if (registers.containsKey(key)) {
+            return registers.get(key) + 1;
+        }
+        
+        return null;
+    }
+    
     public void printInsts() {
         for (Instruction inst : instructions) {
             inst.print();
+        }
+    }
+    
+    public void printMachineCodes() {
+        for (Integer code : programs) {
+            System.out.print(DLX.disassemble(code));
         }
     }
     
