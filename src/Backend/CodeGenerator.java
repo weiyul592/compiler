@@ -113,12 +113,15 @@ public class CodeGenerator {
                     MachineCode = generateMathCode(currInst, DLX.ADD);
                     break;
                 case ADDA:
+                    break;
                 case SUB:
+                    MachineCode = generateMathCode(currInst, DLX.SUB);
+                    break;
                 case MUL:
                     MachineCode = generateMathCode(currInst, DLX.MUL);
                     break;
                 case DIV:
-                    System.out.println("math op not implemented");
+                    MachineCode = generateMathCode(currInst, DLX.DIV);
                     break;
                 case STORE:
                     if (operand1.getType() == ResultType.CONSTANT) {
@@ -173,7 +176,19 @@ public class CodeGenerator {
             return DLX.assemble(opcode + 16, destReg, R1, operand2.getConstValue());
         } else if (op1_type == ResultType.CONSTANT && op2_type == ResultType.VARIABLE) {
             Integer R2 = getRegister( operand2.getInstNumber() );
-            return DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue());
+            
+            if (opcode == DLX.ADD || opcode == DLX.MUL) {
+                /* Add and Mul are commutative */
+                return DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue());
+            } else if (opcode == DLX.SUB) {
+                programs.add(DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue()));
+                return DLX.assemble(DLX.SUB, destReg, 0, destReg);
+            } else if (opcode == DLX.DIV) {
+                System.out.println("DIV num VAR");
+                return null;
+            }
+        } else {
+            System.out.println("op VAR VAR");
         }
         
         return null;
