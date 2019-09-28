@@ -1,6 +1,5 @@
 // Basic while statement test
 main
-procedure foo();
 var a, b, c;
 {
 	let a <- 1;
@@ -18,5 +17,4 @@ var a, b, c;
 	call OutputNum(a);
 	call OutputNum(b);
 	call OutputNum(c)
-};
-{}.
+}.

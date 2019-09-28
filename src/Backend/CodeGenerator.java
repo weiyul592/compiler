@@ -50,8 +50,8 @@ public class CodeGenerator {
         currScope = mainScope;
         loadRegisters(currScope);
         
-        // printInsts();
         generateMachineCode();
+        //printMachineCodes();
         
         stopProcessing();
     }
@@ -99,7 +99,7 @@ public class CodeGenerator {
     
     private void generateMachineCode() {
         for (int i = 0; i < instructions.size(); i++) {
-            if (i == 8) break;
+            //if (i == 14) break;
             
             Instruction currInst = instructions.get(i);
             Opcode opcode = currInst.getOpcode();
@@ -113,6 +113,7 @@ public class CodeGenerator {
                     MachineCode = generateMathCode(currInst, DLX.ADD);
                     break;
                 case ADDA:
+                    MachineCode = generateMathCode(currInst, DLX.ADD);
                     break;
                 case SUB:
                     MachineCode = generateMathCode(currInst, DLX.SUB);
@@ -171,12 +172,14 @@ public class CodeGenerator {
             } else {
                 System.out.println("Add DF nonconstant");
             }
-        } else if (op1_type == ResultType.VARIABLE && op2_type == ResultType.CONSTANT) {
+        } else if ((op1_type == ResultType.VARIABLE || op1_type == ResultType.INSTRUCTION)
+                && op2_type == ResultType.CONSTANT) {
             Integer R1 = getRegister( operand1.getInstNumber() );
             return DLX.assemble(opcode + 16, destReg, R1, operand2.getConstValue());
-        } else if (op1_type == ResultType.CONSTANT && op2_type == ResultType.VARIABLE) {
-            Integer R2 = getRegister( operand2.getInstNumber() );
+        } else if (op1_type == ResultType.CONSTANT && 
+                (op2_type == ResultType.VARIABLE || op2_type == ResultType.INSTRUCTION)) {
             
+            Integer R2 = getRegister( operand2.getInstNumber() );
             if (opcode == DLX.ADD || opcode == DLX.MUL) {
                 /* Add and Mul are commutative */
                 return DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue());
@@ -188,7 +191,9 @@ public class CodeGenerator {
                 return null;
             }
         } else {
-            System.out.println("op VAR VAR");
+            Integer R1 = getRegister( operand1.getInstNumber() );
+            Integer R2 = getRegister( operand2.getInstNumber() );
+            return DLX.assemble(opcode, destReg, R1, R2);
         }
         
         return null;

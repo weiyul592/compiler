@@ -2,7 +2,6 @@
 // Added final let statement to test that phi propagation continues after all
 // the phi instructions.
 main
-function foo();
 var a, b, c;
 {
 	let a <- 1;
@@ -26,7 +25,5 @@ var a, b, c;
 	fi;
 	let a <- a + 1;
 	call OutputNum(a)
-};
-{
 }
 .

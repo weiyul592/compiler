@@ -1,17 +1,10 @@
 main
-var x, y, z, a, b;
-//array [3]input;
-
-//function foo();
-//{
-//	let a <- 33;
-//	return 42
-//};
+array [ 4 ][3] a;
+var b;
 {
-	let x <- 1;
-	let y <- x;
-	let z <- y + 1;
-	let a <- z;
-	let b <- a;
-}
-.
+	let a[0][2] <- 1;
+	let a[2][2] <- 3 * a[0][2];
+	let a[2][1] <- 4 * a[2][2];
+	let a[3][2] <- a[2][1] * a[2][2];
+	call OutputNum(a[3][2])
+}.

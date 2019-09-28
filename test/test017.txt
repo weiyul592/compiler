@@ -1,7 +1,6 @@
 # Copy propagation test
 # Adapted from Muchnick, p.357
 main
-procedure foo();
 var a, b, c, d, e;
 {
 	let a <- 1;
@@ -11,6 +10,5 @@ var a, b, c, d, e;
 		let d <- b + 2
 	fi;
 	let e <- a + b
-};
-{}
+}
 .

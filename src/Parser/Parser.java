@@ -357,7 +357,7 @@ public class Parser {
             }
         } else if (desigResult.getType() == ResultType.SELECTOR){
             Result flatIndex = symbolTable.lookUpArrayIndex(desigResult);
-            Result offset = Result.Compute(flatIndex, Result.ConstResult(4), Opcode.MUL);
+            Result offset = Result.Compute(flatIndex, Result.ConstResult(-4), Opcode.MUL);
             Result DF = Result.AddrResult( Result.AddrType.DF );
             Instruction instBaseAddr = Instruction.add( DF, Result.ConstResult(desigResult.baseAddr) );
             Instruction instAbsoAddr = Instruction.adda(offset, Result.InstResult( instBaseAddr.getInstNumber() ));
@@ -796,7 +796,7 @@ public class Parser {
                 x.ArrayIndexes = ArrayIndexes;
 
                 Result flatIndex = symbolTable.lookUpArrayIndex(x);                
-                Result offset = Result.Compute(flatIndex, Result.ConstResult(4), Opcode.MUL);
+                Result offset = Result.Compute(flatIndex, Result.ConstResult(-4), Opcode.MUL);
                 Result DF = Result.AddrResult( Result.AddrType.DF );
 
                 Instruction instBaseAddr = Instruction.add( DF, Result.ConstResult(x.baseAddr) );

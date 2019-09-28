@@ -2,7 +2,6 @@
 // The third line in the then block, the two lines before the if and he 
 // lines after the fi are not part of the original test case. 
 main
-procedure foo();
 var a, b, c;
 {
 	let a <- 2;
@@ -17,5 +16,4 @@ var a, b, c;
 	fi;
 	let a <- a + 1;
     call OutputNum(a)
-};
-{}.
+}.

@@ -1,6 +1,5 @@
 //Basic if statement test
 main
-function foo();
 var a, b;
 {
 	let a <- 1;
@@ -8,8 +7,7 @@ var a, b;
 	if a > b then
 		let a <- a + 1
 	else
-		let b <- b + 1;
-		let a <- b + 2
+		let b <- b + 1
 	fi;
 	
 	if a < b then
@@ -18,5 +16,4 @@ var a, b;
 	
 	call OutputNum(a);
 	call OutputNum(b)
-};
-{}.
+}.
