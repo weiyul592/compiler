@@ -16,9 +16,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  *
@@ -32,6 +33,10 @@ public class CodeGenerator {
     List<Instruction> instructions;
     HashMap<Integer, Integer> registers;
     
+    HashMap<Integer, Integer> instToPC;
+    List<Integer> branchCodes;
+    int PC;
+    
     static final int DF = 30;
     static final int FP = 28;
     static final int SP = 29;
@@ -42,6 +47,10 @@ public class CodeGenerator {
         mainScope = ControlFlowGraph.getMain();
         programs = new ArrayList<>();
         instructions = new ArrayList<>();
+        
+        instToPC = new HashMap<>();
+        branchCodes = new ArrayList<>();
+        PC = 0;
     }
     
     public void generate() throws IOException {
@@ -51,30 +60,31 @@ public class CodeGenerator {
         loadRegisters(currScope);
         
         generateMachineCode();
-        //printMachineCodes();
+        processBranch();
         
         stopProcessing();
+        printMachineCodes();
     }
     
     private void initialize() {
         Integer globalSize = MemoryAllocator.getInstance().getGlobalCounter();
-        programs.add(DLX.assemble(DLX.ADDI, FP, 30, globalSize * -4));
-        programs.add(DLX.assemble(DLX.ADD, SP, FP, 0));
+        addMachineCode(DLX.assemble(DLX.ADDI, FP, 30, globalSize * -4));
+        addMachineCode(DLX.assemble(DLX.ADD, SP, FP, 0));
     }   
     
     private void stopProcessing() {
-        programs.add(DLX.assemble(DLX.RET, 0));
+        addMachineCode(DLX.assemble(DLX.RET, 0));
     }
     
     private void generateControlFlow(ControlFlowGraph cfg) {
         BasicBlock entryBlock = cfg.getEntryBlock();
         Set<BasicBlock> visited = new HashSet<>();
         
-        Stack<BasicBlock> stack = new Stack<>();
-        stack.push(entryBlock);
+        Queue<BasicBlock> queue = new LinkedList<>();
+        queue.add(entryBlock);
         
-        while (!stack.empty()) {
-            BasicBlock currBlock = stack.pop();
+        while (!queue.isEmpty()) {
+            BasicBlock currBlock = queue.poll();
             if (visited.contains(currBlock)) {
                 continue;
             } else {
@@ -82,7 +92,7 @@ public class CodeGenerator {
             }
             
             for (BasicBlock child : currBlock.getChildrenBlock()) {
-                stack.add(child);
+                queue.add(child);
             }
             
             addInstructions(currBlock);
@@ -124,9 +134,12 @@ public class CodeGenerator {
                 case DIV:
                     MachineCode = generateMathCode(currInst, DLX.DIV);
                     break;
+                case CMP:
+                    MachineCode = generateMathCode(currInst, DLX.CMP);
+                    break;
                 case STORE:
                     if (operand1.getType() == ResultType.CONSTANT) {
-                        programs.add( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
+                        addMachineCode( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, RP1, R2, 0);
                     } else if (operand1.getType() == ResultType.INSTRUCTION) {
@@ -134,7 +147,6 @@ public class CodeGenerator {
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, R1, R2, 0);
                     }
-                    
                     break;
                 case LOAD:
                     destReg = getRegister(currInst.getInstNumber());
@@ -145,12 +157,18 @@ public class CodeGenerator {
                     R1 = getRegister(operand1.getInstNumber());
                     MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
+                case BLE:
+                    /* this MachineCode is replaced later */
+                    MachineCode = i;
+                    branchCodes.add(MachineCode);
+                    break;
                 default:
                     break;
             }
             
             if (MachineCode != null) {
-                programs.add(MachineCode);
+                addMachineCode(MachineCode);
+                instToPC.put(currInst.getInstNumber(), PC-1);
             } else {
                 System.out.println("Woops: " + opcode);
             }
@@ -184,7 +202,8 @@ public class CodeGenerator {
                 /* Add and Mul are commutative */
                 return DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue());
             } else if (opcode == DLX.SUB) {
-                programs.add(DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue()));
+                // TOFIX
+                addMachineCode(DLX.assemble(opcode + 16, destReg, R2, operand1.getConstValue()));
                 return DLX.assemble(DLX.SUB, destReg, 0, destReg);
             } else if (opcode == DLX.DIV) {
                 System.out.println("DIV num VAR");
@@ -197,6 +216,41 @@ public class CodeGenerator {
         }
         
         return null;
+    }
+    
+    public void processBranch() {
+        for (Integer code : branchCodes) {
+            System.out.println(code);
+            Instruction branchInst = instructions.get(code);
+            
+            Opcode opcode = branchInst.getOpcode();
+            Result operand1 = branchInst.getOperand1();
+            Result operand2 = branchInst.getOperand2();
+            Integer MachineCode = null;
+            Integer R1, R2, destReg;
+            
+            switch (opcode) {
+                case BLE:
+                    R1 = getRegister(operand1.getInstNumber());
+                    Integer branchTo = operand2.getInstNumber();
+                    Integer branchToPC = instToPC.get(branchTo);
+                    Integer selfPC = instToPC.get(branchInst.getInstNumber());
+                    Integer offset = branchToPC - selfPC;
+                    
+                    System.out.println(branchToPC);
+                    MachineCode = DLX.assemble(DLX.BLE, R1, offset);
+                    break;
+                default:
+                    break;
+            }
+            
+            if (MachineCode != null) {
+                Integer index = programs.indexOf(code);
+                programs.set(index, MachineCode);
+            } else {
+                System.out.println("Woops: " + opcode);
+            }
+        }
     }
     
     public void execute() throws IOException {
@@ -214,6 +268,11 @@ public class CodeGenerator {
         }
         
         return null;
+    }
+    
+    private void addMachineCode(Integer code) {
+        programs.add(code);
+        PC++;
     }
     
     public void printInsts() {
