@@ -467,9 +467,7 @@ public class Parser {
         
         // add domination information
         BasicBlock_Initial.addImmediateDomination(fallThroughBl);
-        BasicBlock_Initial.addImmediateDomination(joinBlock);
         fallThroughBl.setDominator(BasicBlock_Initial);
-        joinBlock.setDominator(BasicBlock_Initial);
         
         // add child parent information
         BasicBlock_Initial.addChildBlock(fallThroughBl);
@@ -552,6 +550,9 @@ public class Parser {
             
             ThenPart_LastInst.connectTo(joinBlock.getFirstInst());
         }
+        
+        BasicBlock_Initial.addImmediateDomination(joinBlock);
+        joinBlock.setDominator(BasicBlock_Initial);
         
         IsToken(Token.fiToken);
         ResetBasedOnPHI(joinBlock.getPhiInstructions());

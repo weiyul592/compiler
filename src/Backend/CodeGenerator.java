@@ -78,24 +78,14 @@ public class CodeGenerator {
     
     private void generateControlFlow(ControlFlowGraph cfg) {
         BasicBlock entryBlock = cfg.getEntryBlock();
-        Set<BasicBlock> visited = new HashSet<>();
-        
-        Queue<BasicBlock> queue = new LinkedList<>();
-        queue.add(entryBlock);
-        
-        while (!queue.isEmpty()) {
-            BasicBlock currBlock = queue.poll();
-            if (visited.contains(currBlock)) {
-                continue;
-            } else {
-                visited.add(currBlock);
-            }
-            
-            for (BasicBlock child : currBlock.getChildrenBlock()) {
-                queue.add(child);
-            }
-            
-            addInstructions(currBlock);
+        generateControlFlow(entryBlock);
+    }
+    
+    private void generateControlFlow(BasicBlock block) {
+        addInstructions(block);
+        List<BasicBlock> dominations = block.getImmediateDominations();
+        for (BasicBlock domination : dominations) {
+            generateControlFlow(domination);
         }
     }
     
@@ -109,7 +99,7 @@ public class CodeGenerator {
     
     private void generateMachineCode() {
         for (int i = 0; i < instructions.size(); i++) {
-            //if (i == 14) break;
+            //if (i == 90) break;
             
             Instruction currInst = instructions.get(i);
             Opcode opcode = currInst.getOpcode();
@@ -142,11 +132,13 @@ public class CodeGenerator {
                         addMachineCode( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, RP1, R2, 0);
-                    } else if (operand1.getType() == ResultType.INSTRUCTION) {
+                    } else if (operand1.getType() == ResultType.INSTRUCTION ||
+                            operand1.getType() == ResultType.VARIABLE) {
                         R1 = getRegister(operand1.getInstNumber());
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, R1, R2, 0);
-                    }
+                    } 
+                    
                     break;
                 case LOAD:
                     destReg = getRegister(currInst.getInstNumber());
@@ -178,8 +170,9 @@ public class CodeGenerator {
             if (MachineCode != null) {
                 addMachineCode(MachineCode);
                 instToPC.put(currInst.getInstNumber(), PC-1);
-            } else if (opcode != Opcode.EMPTY) {
+            } else {
                 System.out.println("Woops: " + opcode);
+                currInst.print();
             }
         }
     }

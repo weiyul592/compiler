@@ -442,7 +442,7 @@ public class DLX {
 	}
 	
 	static int assemble(int op) {
-		if (op != WRL || op != NOOP) {
+		if (op != WRL && op != NOOP) {
 			System.out.println("DLX.assemble: the only instruction without arguments is WRL!");
 			bug(1);
 		} 
