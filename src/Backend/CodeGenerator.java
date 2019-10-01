@@ -63,7 +63,7 @@ public class CodeGenerator {
         processBranch();
         
         stopProcessing();
-        printMachineCodes();
+        //printMachineCodes();
     }
     
     private void initialize() {
@@ -157,7 +157,13 @@ public class CodeGenerator {
                     R1 = getRegister(operand1.getInstNumber());
                     MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
+                case BRA:
+                case BNE:
+                case BEQ:
                 case BLE:
+                case BLT:
+                case BGE:
+                case BGT:
                     /* this MachineCode is replaced later */
                     MachineCode = i;
                     branchCodes.add(MachineCode);
@@ -220,25 +226,45 @@ public class CodeGenerator {
     
     public void processBranch() {
         for (Integer code : branchCodes) {
-            System.out.println(code);
             Instruction branchInst = instructions.get(code);
             
             Opcode opcode = branchInst.getOpcode();
             Result operand1 = branchInst.getOperand1();
             Result operand2 = branchInst.getOperand2();
             Integer MachineCode = null;
-            Integer R1, R2, destReg;
+            Integer R1, R2, destReg, branchTo = null;
             
+            R1 = getRegister(operand1.getInstNumber());
+            if (opcode == Opcode.BRA) {
+                branchTo = operand1.getInstNumber();
+            } else {
+                branchTo = operand2.getInstNumber();
+            }
+            
+            Integer branchToPC = instToPC.get(branchTo);
+            Integer selfPC = instToPC.get(branchInst.getInstNumber());
+            Integer offset = branchToPC - selfPC;
             switch (opcode) {
+                case BRA:
+                    MachineCode = DLX.assemble(DLX.BSR, offset);
+                    break;
+                case BNE:
+                    MachineCode = DLX.assemble(DLX.BNE, R1, offset);
+                    break;
+                case BEQ:
+                    MachineCode = DLX.assemble(DLX.BEQ, R1, offset);
+                    break;
                 case BLE:
-                    R1 = getRegister(operand1.getInstNumber());
-                    Integer branchTo = operand2.getInstNumber();
-                    Integer branchToPC = instToPC.get(branchTo);
-                    Integer selfPC = instToPC.get(branchInst.getInstNumber());
-                    Integer offset = branchToPC - selfPC;
-                    
-                    System.out.println(branchToPC);
                     MachineCode = DLX.assemble(DLX.BLE, R1, offset);
+                    break;
+                case BLT:
+                    MachineCode = DLX.assemble(DLX.BLT, R1, offset);
+                    break;
+                case BGE:
+                    MachineCode = DLX.assemble(DLX.BGE, R1, offset);
+                    break;
+                case BGT:
+                    MachineCode = DLX.assemble(DLX.BGT, R1, offset);
                     break;
                 default:
                     break;
