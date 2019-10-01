@@ -168,6 +168,9 @@ public class CodeGenerator {
                     MachineCode = i;
                     branchCodes.add(MachineCode);
                     break;
+                case EMPTY:
+                    MachineCode = DLX.assemble(DLX.NOOP);
+                    break;
                 default:
                     break;
             }
@@ -175,7 +178,7 @@ public class CodeGenerator {
             if (MachineCode != null) {
                 addMachineCode(MachineCode);
                 instToPC.put(currInst.getInstNumber(), PC-1);
-            } else {
+            } else if (opcode != Opcode.EMPTY) {
                 System.out.println("Woops: " + opcode);
             }
         }

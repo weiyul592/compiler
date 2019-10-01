@@ -220,6 +220,8 @@ public class DLX {
 				case WRL:
 					System.out.println();
 					break;
+				case NOOP:
+					break;
 				case ERR:
 					System.out.println("Program dropped off the end!");
 					bug(1);
@@ -243,7 +245,7 @@ public class DLX {
 	"ADD","SUB","MUL","DIV","MOD","CMP","ERR","ERR","OR","AND","BIC","XOR","LSH","ASH","CHK","ERR",
 	"ADDI","SUBI","MULI","DIVI","MODI","CMPI","ERRI","ERRI","ORI","ANDI","BICI","XORI","LSHI","ASHI","CHKI","ERR",
 	"LDW","LDX","POP","ERR","STW","STX","PSH","ERR","BEQ","BNE","BLT","BGE","BLE","BGT","BSR","ERR",
-	"JSR","RET","RDI","WRD","WRH","WRL","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR",
+	"JSR","RET","RDI","WRD","WRH","WRL", "NOOP", "ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR",
 	"ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR","ERR"};
 	static final int ADD = 0;  
 	static final int SUB = 1;
@@ -294,6 +296,7 @@ public class DLX {
 	static final int WRD = 51;
 	static final int WRH = 52;
 	static final int WRL = 53;
+	static final int NOOP = 54;
 	
 	static final int ERR = 63; // error opcode which is insertered by loader 
 	                           // after end of program code
@@ -308,6 +311,7 @@ public class DLX {
 			case WRD:
 			case WRH:
 			case WRL:
+			case NOOP:
 			case CHKI:
 			case BEQ:
 			case BNE:
@@ -438,7 +442,7 @@ public class DLX {
 	}
 	
 	static int assemble(int op) {
-		if (op != WRL) {
+		if (op != WRL || op != NOOP) {
 			System.out.println("DLX.assemble: the only instruction without arguments is WRL!");
 			bug(1);
 		} 
