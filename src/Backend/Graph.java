@@ -218,7 +218,7 @@ public class Graph {
             
             nodes_copy.put(node_name, new_node);
         }
-        
+       
         for (Integer nodeName : nodes_copy.keySet()) {
             Node node = nodes_copy.get(nodeName);
             if (node.is_cluster) {
@@ -230,14 +230,14 @@ public class Graph {
                 retString.append(cluster.toString());
                 retString.append("\"]");
                 System.out.println(retString.toString());
-                
             }
         }
         
         for (Integer nodeName : nodes_copy.keySet()) {
             Node node = nodes_copy.get(nodeName);
             HashSet<Integer> outEdges = node.getEdges();
-        
+
+            System.out.println(nodeName);
             for (Integer out_edge : outEdges) {
                 System.out.println(nodeName + "--" + out_edge);
                 
