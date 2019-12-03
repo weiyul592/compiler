@@ -62,9 +62,7 @@ public class CopyPropagation {
                     //System.out.print( op2 + ":-> " + copyMap.get(op2) + "\n" );
 
                     basicBlock.removeInst(currInst);
-                } else if (copyMap.containsKey(op2)) { // KillSet
-			copyMap.remove(op2);
-		}
+                }
 
                 currInst = currInst.getNext();
             }
