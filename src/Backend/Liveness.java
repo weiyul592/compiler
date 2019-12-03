@@ -95,7 +95,7 @@ public class Liveness {
             
             BlockLiveOut.put(currBlock, currBlockLiveOut);
             
-            Set<Integer> currBlockLiveIn = new HashSet(currBlockLiveOut);
+            Set<Integer> currBlockLiveIn = new HashSet<>(currBlockLiveOut);
             currBlockLiveIn.addAll( use(currBlock) );
             currBlockLiveIn.removeAll( def(currBlock) );
             

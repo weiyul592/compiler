@@ -252,12 +252,10 @@ public class ControlFlowGraph {
                     getName() + fileNamePostfix + ".gv");
             Files.write(graphFile, graphDescription.getBytes());
             
-            /*
             Path psFile = Paths.get("graphs", Parser.getInstance().getFileName(),
-                    getName() + fileNamePostfix + ".ps");
+                    getName() + fileNamePostfix + ".pdf");
 
-            Runtime.getRuntime().exec("dot -Tps " + graphFile + " -o " + psFile);
-            */
+            Runtime.getRuntime().exec("dot -Tpdf " + graphFile + " -o " + psFile);
         } catch (IOException e) {
             e.printStackTrace();
         }

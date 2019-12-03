@@ -23,7 +23,7 @@ public class CopyPropagation {
     private HashMap<Result, Result> copyMap;
     
     public CopyPropagation() {
-        copyMap = new HashMap();
+        copyMap = new HashMap<>();
     }
     
     public void execute(ControlFlowGraph cfg) {

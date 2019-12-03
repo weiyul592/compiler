@@ -13,14 +13,15 @@ import Parser.CopyPropagation;
 import Parser.Parser;
 import SSA.MemoryAllocator;
 import SSA.SymbolTable;
+
 import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 /**
  *
- * @author weiyu
+ * @author Weiyu, Amir
  */
 
 public class Main {
@@ -33,7 +34,10 @@ public class Main {
 //        Parser.getInstance().parsing("test/test005.txt");
 //        Parser.getInstance().parsing("test/test006.txt");
 
-        Parser.getInstance().parsing("test/test001.txt");
+		System.out.println("argument: " + args[0]);
+
+        Parser.getInstance().parsing(args[0]);
+
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
             CopyPropagation CPpass = new CopyPropagation();
             CSEPass csePass = new CSEPass();
@@ -42,10 +46,9 @@ public class Main {
             CPpass.execute(cfg);
             csePass.execute(cfg);
             
-            System.out.println(cfg.getName());
+//          System.out.println(cfg.getName());
             registerAllocator.execute(cfg);
         }
-        
 /*
         for (ControlFlowGraph cfg : ControlFlowGraph.getCFGs().values()) {
             System.out.println(cfg.getName());
@@ -58,6 +61,8 @@ public class Main {
         CodeGenerator tmp = new CodeGenerator();
         tmp.generate();
         tmp.execute();
+
+        System.out.println();
 
 //        Parser.getInstance().parsing("test/test008.txt");
 //        Parser.getInstance().parsing("test/test009.txt");

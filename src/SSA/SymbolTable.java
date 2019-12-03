@@ -26,7 +26,7 @@ public class SymbolTable {
     }
     
     public SymbolTable() {
-        SymTable = new HashMap();
+        SymTable = new HashMap<>();
         prePopulate();
     }
     

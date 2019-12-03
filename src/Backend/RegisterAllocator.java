@@ -84,7 +84,7 @@ public class RegisterAllocator {
      * Returns a Simplicial Elimination Ordering */
     private List<Integer> MCS() {
         HashMap<Node, Integer> cost_map = new HashMap<>();
-        List<Integer> SimElimOrder = new ArrayList();   
+        List<Integer> SimElimOrder = new ArrayList<>();   
         Set<Node> nodeSet = new HashSet<>(interGraph.getNodes());
         
         for (Node node : nodeSet)
