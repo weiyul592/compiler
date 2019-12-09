@@ -153,6 +153,9 @@ public class CodeGenerator {
                     R1 = getRegister(operand1.getInstNumber());
                     MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
+                case WRITENL:
+                    MachineCode = DLX.assemble(DLX.WRL);
+                    break;
                 case READ:
                     destReg = getRegister(currInst.getInstNumber());
                     MachineCode = DLX.assemble(DLX.RDI, destReg);

@@ -159,19 +159,26 @@ public class Parser {
         // Add the variable or the array with its dimentions to the symbol table
         if (ArrayDimensions.isEmpty() ) {
             symbolTable.pushSymbol(var, scope);
+            while (currentToken == Token.commaToken) {
+                IsToken(Token.commaToken);
+                IsToken(Token.ident);
+            
+                var = scanner_obj.getStringFromId(last_ident);
+                symbolTable.pushSymbol(var, scope);
+            }
         } else {
             symbolTable.pushArray(var, ArrayDimensions);
+            while (currentToken == Token.commaToken) {
+                IsToken(Token.commaToken);
+                IsToken(Token.ident);
+            
+                var = scanner_obj.getStringFromId(last_ident);
+                symbolTable.pushArray(var, ArrayDimensions);
+            }
         }
         
         // Arrays do not support comma separated declaration
         // Add remaining variables to the symbol table
-        while (currentToken == Token.commaToken) {
-            IsToken(Token.commaToken);
-            IsToken(Token.ident);
-        
-            var = scanner_obj.getStringFromId(last_ident);
-            symbolTable.pushSymbol(var, scope);
-        }
         IsToken(Token.semiToken);
     }
 	
