@@ -35,7 +35,7 @@ public class SymbolTable {
         List<Symbol> oneParameter = new ArrayList<>();
         oneParameter.add( Symbol.variable("oneparam") );
         
-        pushProcedure("InputNum", oneParameter);
+        pushProcedure("InputNum", new ArrayList<>());
         pushProcedure("OutputNum", oneParameter);
         pushProcedure("OutputNewLine", new ArrayList<>());
     }

@@ -149,6 +149,12 @@ public class CodeGenerator {
                     R1 = getRegister(operand1.getInstNumber());
                     MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
+                case READ:
+                    System.out.println(currInst.getInstNumber());
+                    destReg = getRegister(currInst.getInstNumber());
+                    System.out.println(destReg);
+
+                    MachineCode = DLX.assemble(DLX.RDI, destReg);
                 case BRA:
                 case BNE:
                 case BEQ:

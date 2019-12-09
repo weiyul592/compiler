@@ -175,7 +175,9 @@ public class Liveness {
                 break;
             case CALL: System.out.println("function call detected\n"); 
                 break;
-            case READ: System.out.println("read detected\n"); 
+            case READ:
+				defSet.add( inst.getInstNumber() );
+				System.out.println("read detected\n"); 
                 break;
             default: break; // do nothing
         }
