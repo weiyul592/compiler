@@ -128,16 +128,20 @@ public class CodeGenerator {
                     MachineCode = generateMathCode(currInst, DLX.CMP);
                     break;
                 case STORE:
-                    if (operand1.getType() == ResultType.CONSTANT) {
+                    ResultType op_type = operand1.getType();
+                    if (op_type == ResultType.CONSTANT) {
                         addMachineCode( DLX.assemble(DLX.ADDI, RP1, 0, operand1.getConstValue()) );
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, RP1, R2, 0);
-                    } else if (operand1.getType() == ResultType.INSTRUCTION ||
-                            operand1.getType() == ResultType.VARIABLE) {
+                    } else if (op_type == ResultType.INSTRUCTION ||
+                            op_type == ResultType.VARIABLE ||
+                            op_type == ResultType.PROCEDURE) {
                         R1 = getRegister(operand1.getInstNumber());
                         R2 = getRegister(operand2.getInstNumber());
                         MachineCode = DLX.assemble(DLX.STW, R1, R2, 0);
-                    } 
+                    } else {
+                        System.out.println("op type: " + operand1.getType() + " not implemented");
+                    }
                     
                     break;
                 case LOAD:
@@ -150,11 +154,9 @@ public class CodeGenerator {
                     MachineCode = DLX.assemble(DLX.WRD, R1);
                     break;
                 case READ:
-                    System.out.println(currInst.getInstNumber());
                     destReg = getRegister(currInst.getInstNumber());
-                    System.out.println(destReg);
-
                     MachineCode = DLX.assemble(DLX.RDI, destReg);
+                    break;
                 case BRA:
                 case BNE:
                 case BEQ:

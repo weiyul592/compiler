@@ -64,6 +64,7 @@ public class Liveness {
         
         BlockLiveOut.put(exitBlock, new HashSet<>());
         Set<Integer> exitIn = use(exitBlock);
+        
         exitIn.removeAll( def(exitBlock) );
         BlockLiveIn.put(exitBlock, exitIn );
         
@@ -176,8 +177,7 @@ public class Liveness {
             case CALL: System.out.println("function call detected\n"); 
                 break;
             case READ:
-				defSet.add( inst.getInstNumber() );
-				System.out.println("read detected\n"); 
+		defSet.add( inst.getInstNumber() );
                 break;
             default: break; // do nothing
         }
@@ -221,7 +221,6 @@ public class Liveness {
             addOperand(operand1, useSet);
             addOperand(operand2, useSet);
         }
-        
         return useSet;
     }
     
@@ -244,7 +243,8 @@ public class Liveness {
     private void addOperand(Result operand, Set<Integer> liveSet) {
         if (operand != null) {
             Result.ResultType opType = operand.getType();
-            if (opType == Result.ResultType.INSTRUCTION || opType == Result.ResultType.VARIABLE) {
+            if (opType == Result.ResultType.INSTRUCTION || opType == Result.ResultType.VARIABLE ||
+                opType == Result.ResultType.PROCEDURE) {
                 liveSet.add(operand.getInstNumber());
             }
         }

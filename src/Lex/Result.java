@@ -125,7 +125,7 @@ public class Result {
                 case INSTRUCTION:
                     return x.getInstNumber() == y.getInstNumber();
                 case PROCEDURE: 
-                    System.out.println("procedure result comparison not implemented");
+                    // System.out.println("procedure result comparison not implemented");
                     return false;
                 case ADDRESS: 
                     return x.getAddrType() == y.getAddrType();

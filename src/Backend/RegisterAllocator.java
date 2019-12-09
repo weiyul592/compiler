@@ -44,7 +44,7 @@ public class RegisterAllocator {
     public void execute(ControlFlowGraph cfg) {
         Liveness analysis = new Liveness();
         liveRanges = analysis.computeLiveSets(cfg);
-        analysis.printInstOut();
+        //analysis.printInstOut();
         
         // build interference graph
         buildGraph();
