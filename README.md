@@ -1,1 +1,1 @@
-This compiler is implemented for a graduate-level course project.
+This compiler is implemented for a course project of "Advanced Compiler Construction". 
